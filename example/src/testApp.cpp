@@ -5,14 +5,15 @@ void testApp::setup(){
 
     ofSetBackgroundColor(0);
     
-    bNeedsUpdate = true;;
+    bNeedsUpdate = true; // a housekeeping variable to respond to gui changes
     
-    currentClipperType     = OFX_CLIPPER_INTERSECTION;
-    currentClipperJoinType = OFX_CLIPPER_JOINTYPE_SQUARE;
+    currentClipperType     = OFX_CLIPPER_INTERSECTION;      // the clip type
+    currentClipperJoinType = OFX_CLIPPER_JOINTYPE_SQUARE;   // for offsets, the joint type
     
-    clipSubjectType = CIRCLES;
-    clipMaskType    = CIRCLES;
+    clipSubjectType = CIRCLES;  // what kind of test subjects to create
+    clipMaskType    = CIRCLES;  // what kind of test clip masks to create
 
+    // gui setup
     clipTypePanel.setup("clipper","settings.xml", 10, 10);
     clipTypePanel.add(clipTypeSlider.setup("TYPE: INTERSECTION",0,0,3));
     clipTypePanel.add(subjectTypeSlider.setup("SUBJ. POLYS: CIRCLES",0,0,2));
@@ -34,12 +35,11 @@ void testApp::setup(){
     offsetPanel.add(joinTypeSlider.setup("TYPE: SQUARE",0,0,2));
     offsetPanel.add(miterLimitSlider.setup("miter limit",2,0,30));
     
-    
-    
     joinTypeSlider.addListener(this,&testApp::joinType);
     miterLimitSlider.addListener(this,&testApp::miterLimit);
     offsetDeltaSlider.addListener(this,&testApp::offsetDelta);
 
+    // generate some initial data
     genSubjects(nClipSubjects);
     genMasks(nClipMasks);
 
@@ -52,13 +52,22 @@ void testApp::update(){
 
     if(bNeedsUpdate) {
         
+        // clear out our temporary clipped data
         clips.clear();
         
+        // clear the clipper's internal polys
         clipper.clear();
+        // add the clipper subjects (i.e. the things that will be clipped)
         clipper.addPolylines(clipSubjects,OFX_CLIPPER_SUBJECT);
+        
+        // add the clipper masks (i.e. the things that will do the clipping)
         clipper.addPolylines(clipMasks,OFX_CLIPPER_CLIP);
+
+        // execute the clipping operation based on the current clipping type
         clipper.clip(currentClipperType,clips);
         
+        
+        // if we have offsets enabled, generate the offsets
         if(enableOffsetsToggle) {
             offsets.clear();
             OffsetPolygons(clips, 
@@ -82,17 +91,59 @@ void testApp::draw(){
 
     ofEnableAlphaBlending();
 
+    // make a little legend for the color
+    ////////////////////////////////////////////////
+    int y = ofGetHeight() - 60;
+    int x = 10;
+    int h = 12;
+    int w = 30;
+    
+    ofColor cSubject(255,0,0,127);
+    ofColor cMask(255,255,0,127);
+    ofColor cResult(0,255,0,200);
+    ofColor cOffset(0,0,255,200);
+    
+    ofFill();
+    ofSetColor(cSubject);
+    ofRect(x,y-h+2,w,h);
+    ofSetColor(255);
+    ofDrawBitmapString("Polygon Clip Subjects", ofPoint(x + w + 2,y));
+    
+    y+= 16;
+    ofFill();
+    ofSetColor(cMask);
+    ofRect(x,y-h+2,w,h);
+    ofSetColor(255);
+    ofDrawBitmapString("Polygon Clip Masks", ofPoint(x + w + 2,y));
+
+    y+= 16;
+    ofFill();
+    ofSetColor(cResult);
+    ofRect(x,y-h+2,w,h);
+    ofSetColor(255);
+    ofDrawBitmapString("Clip Results", ofPoint(x + w + 2,y));
+
+    y+= 16;
+    ofFill();
+    ofSetColor(cOffset);
+    ofRect(x,y-h+2,w,h);
+    ofSetColor(255);
+    ofDrawBitmapString("Offset Results", ofPoint(x + w + 2,y));
+
+    
+    // draw all of the pieces
+    ////////////////////////////////////////////////
     ofPushMatrix();
     ofTranslate(-ofGetWidth() / 4, 0);
 
     for(int i = 0; i < clipSubjects.size(); i++) {
-        ofSetColor(255,0,0,127);
+        ofSetColor(cSubject);
         ofNoFill();
         clipSubjects[i].draw();
     }
     
     for(int i = 0; i < clipMasks.size(); i++) {
-        ofSetColor(255,255,0,127);
+        ofSetColor(cMask);
         ofNoFill();
         clipMasks[i].draw();
     }
@@ -103,14 +154,14 @@ void testApp::draw(){
     ofTranslate(ofGetWidth() / 4, 0);
     
     for(int i = 0; i < clips.size(); i++) {
-        ofSetColor(0,255,0,200);
+        ofSetColor(cResult);
         ofNoFill();
         clips[i].draw();
     }
 
     if(enableOffsetsToggle) {
         for(int i = 0; i < offsets.size(); i++) {
-            ofSetColor(0,0,255,100);
+            ofSetColor(cOffset);
             ofNoFill();
             offsets[i].draw();
         }
@@ -118,6 +169,9 @@ void testApp::draw(){
     
     ofPopMatrix();
     
+    
+    // draw the gui
+    ////////////////////////////////////////////////
     clipTypePanel.draw();
     offsetPanel.draw();
 
