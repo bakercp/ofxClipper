@@ -12,12 +12,11 @@
 #pragma once
 
 #include "ofMain.h"
-
 #include "clipper.hpp"
 
-#define DEFAULT_SCALE 1000000000
+static int clipperGlobalScale = 1000000000;
 
-typedef vector<ofPolyline> ofPolylines;
+typedef vector<ofPolyline> ofxPolylines;
 
 enum ofxClipperClipType {
     OFX_CLIPPER_INTERSECTION = ClipperLib::ctIntersection,
@@ -37,96 +36,55 @@ enum ofxClipperJoinType {
     OFX_CLIPPER_JOINTYPE_MITER  = ClipperLib::jtMiter, 
 };
 
-// conversion functions
-void ofPathToPolygons(ofPath& path, ClipperLib::Polygons& polygons,
-                      ClipperLib::long64 xScale,
-                      ClipperLib::long64 yScale);
-
-ClipperLib::Polygon ofPolylineToPolygon(ofPolyline& polyline,
-                                        ClipperLib::long64 xScale,
-                                        ClipperLib::long64 yScale);
-
-void ofPolylinesToPolygons(ofPolylines& polylines, 
-                           ClipperLib::Polygons& polygons,
-                           ClipperLib::long64 xScale,
-                           ClipperLib::long64 yScale);
-
-
-ofPolyline polygonToofPolyline(ClipperLib::Polygon& polygon,
-                               ClipperLib::long64 xScale,
-                               ClipperLib::long64 yScale);
-
-
-void polygonsToofPolylines(ClipperLib::Polygons& polygons, 
-                           ofPolylines& polylines,
-                           ClipperLib::long64 xScale,
-                           ClipperLib::long64 yScale);
-
-ClipperLib::PolyFillType convertWindingType(ofPolyWindingMode windingMode);
-
-// utility functions
-bool Orientation(const ofPolyline &poly,
-                 ClipperLib::long64 xScale,
-                 ClipperLib::long64 yScale);
-double Area(const ofPolyline &poly,
-            ClipperLib::long64 xScale,
-            ClipperLib::long64 yScale);
-void OffsetPolygons(ofPolylines &in_polys, 
-                    ofPolylines &out_polys,
-                    double delta, ofxClipperJoinType 
-                    jointype = OFX_CLIPPER_JOINTYPE_SQUARE, 
-                    double MiterLimit = 2,
-                    ClipperLib::long64 xScale = DEFAULT_SCALE,
-                    ClipperLib::long64 yScale = DEFAULT_SCALE);
-void SimplifyPolygon(ofPolyline &in_poly, 
-                     ofPolylines  &out_polys,
-                     ClipperLib::long64 xScale = DEFAULT_SCALE,
-                     ClipperLib::long64 yScale = DEFAULT_SCALE);
-void SimplifyPolygons(ofPolylines &in_polys, 
-                      ofPolylines &out_polys,
-                      ClipperLib::long64 xScale = DEFAULT_SCALE,
-                      ClipperLib::long64 yScale = DEFAULT_SCALE);
-void SimplifyPolygons(ofPolylines &polys,
-                      ClipperLib::long64 xScale = DEFAULT_SCALE,
-                      ClipperLib::long64 yScale = DEFAULT_SCALE);
-void ReversePoints(ofPolyline& p,
-                   ClipperLib::long64 xScale = DEFAULT_SCALE,
-                   ClipperLib::long64 yScale = DEFAULT_SCALE);
-void ReversePoints(ofPolylines& p,
-                   ClipperLib::long64 xScale = DEFAULT_SCALE,
-                   ClipperLib::long64 yScale = DEFAULT_SCALE);
-
 class ofxClipper : public ClipperLib::Clipper {
 public:
     ofxClipper();
     virtual ~ofxClipper();
     
-    bool addPath(ofPath& path, 
-                 ofxClipperPolyType clipperType,
-                 ClipperLib::long64 xScale = DEFAULT_SCALE,
-                 ClipperLib::long64 yScale = DEFAULT_SCALE);
-    bool addPolylines(ofPolylines& polylines, 
-                     ofxClipperPolyType clipperType,
-                     ClipperLib::long64 xScale = DEFAULT_SCALE,
-                     ClipperLib::long64 yScale = DEFAULT_SCALE);
-    bool addPolyline(ofPolyline& polyline, 
-                     ofxClipperPolyType clipperType,
-                     ClipperLib::long64 xScale = DEFAULT_SCALE,
-                     ClipperLib::long64 yScale = DEFAULT_SCALE);
-    bool addRectangle(ofRectangle& rectangle, 
-                      ofxClipperPolyType clipperType,
-                      ClipperLib::long64 xScale = DEFAULT_SCALE,
-                      ClipperLib::long64 yScale = DEFAULT_SCALE);
+    // Member Function
+    ////////////////////////////////////////////////
+    bool addPath(ofPath& path, ofxClipperPolyType clipperType);
+    bool addPolylines(ofxPolylines& polylines,ofxClipperPolyType clipperType);
+    bool addPolyline(ofPolyline& polyline,ofxClipperPolyType clipperType);
+    bool addRectangle(ofRectangle& rectangle,ofxClipperPolyType clipperType);
 
     bool clip(ofxClipperClipType clipType, 
-                 ofPolylines &solution,
-                 ofPolyWindingMode subFillType = OF_POLY_WINDING_ODD,
-                 ofPolyWindingMode clipFillType = OF_POLY_WINDING_ODD,
-                 ClipperLib::long64 xScale = DEFAULT_SCALE, 
-                 ClipperLib::long64 yScale = DEFAULT_SCALE);
+              ofxPolylines &solution,
+              ofPolyWindingMode subFillType = OF_POLY_WINDING_ODD,
+              ofPolyWindingMode clipFillType = OF_POLY_WINDING_ODD);
 
     void clear();
     
-private:
+    // Static Utility Functions
+    ////////////////////////////////////////////////
+    static bool Orientation(ofPolyline &poly);
+    static double Area(ofPolyline &poly);
+    static void OffsetPolylines(ofxPolylines &in_polys, 
+                        ofxPolylines &out_polys,
+                        double offset, 
+                        ofxClipperJoinType jointype = OFX_CLIPPER_JOINTYPE_SQUARE, 
+                        double MiterLimit = 2);
+    static void SimplifyPolyline(ofPolyline &in_poly,ofxPolylines  &out_polys);
+    static void SimplifyPolylines(ofxPolylines &in_polys,ofxPolylines &out_polys);
+    static void SimplifyPolylines(ofxPolylines &polys);
+    static void SimplifyPath(ofPath &path, ofxPolylines &out_polys);
+    static void ReversePolyline(ofPolyline& p);
+    static void ReversePolylines(ofxPolylines& p);
+    static void ReversePath(ofPath& p,ofxPolylines &out_polys);
+
+    static void setGlobalScale(ClipperLib::long64 newScale);
+
+//protected:
+    // conversion functions
+    static void ofPath_to_Polygons(ofPath& path, ClipperLib::Polygons& polygons);
+    static ClipperLib::Polygon ofPolyline_to_Polygon(ofPolyline& polyline);
+    static void ofxPolylines_to_Polygons(ofxPolylines& polylines, ClipperLib::Polygons& polygons);
+                
+                                      
+    static ofPolyline polygon_to_ofPolyline(ClipperLib::Polygon& polygon);
+    static void polygons_to_ofxPolylines(ClipperLib::Polygons& polygons, ofxPolylines& polylines);
+
+    static ClipperLib::PolyFillType convertWindingType(ofPolyWindingMode windingMode);
+
     
 };

@@ -28,16 +28,18 @@ public:
     ofxClipperJoinType currentClipperJoinType;
     
     TestPolyType clipSubjectType;
-    ofPolylines clipSubjects;
+    ofxPolylines clipSubjects;
 
     TestPolyType clipMaskType;
-    ofPolylines clipMasks;
+    ofxPolylines clipMasks;
     
-    ofPolylines clips;
-    ofPolylines offsets;
+    ofxPolylines clips;
+    ofxPolylines offsets;
 
     // minimal gui
 
+    ofPath complexPath;
+    ofxPolylines simplifiedPath;
     
     ofxPanel clipTypePanel;
     ofxIntSlider clipTypeSlider;
@@ -53,6 +55,12 @@ public:
     ofxFloatSlider miterLimitSlider;
     ofxFloatSlider offsetDeltaSlider;
     ofxToggle      enableOffsetsToggle;
+    
+    ofxPanel simplifyPanel;
+    ofxIntSlider simplifyPath;
+    bool bSimplifyPathNeedsUpdate;
+    
+    void genSimplifyPath(int &ct);
     
     void genSubjects(int & ct);
     void genMasks(int & ct);

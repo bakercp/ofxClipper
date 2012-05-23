@@ -18,40 +18,32 @@ ofxClipper::~ofxClipper() {
 
 //--------------------------------------------------------------
 bool ofxClipper::addPath(ofPath& path, 
-                         ofxClipperPolyType clipperType,
-                         ClipperLib::long64 xScale,
-                         ClipperLib::long64 yScale) {
+                         ofxClipperPolyType clipperType) {
     
     ClipperLib::Polygons out;
-    ofPathToPolygons(path,out,xScale,yScale);
+    ofPath_to_Polygons(path,out);
     AddPolygons(out,(ClipperLib::PolyType)clipperType);
 }
 
 //--------------------------------------------------------------
-bool ofxClipper::addPolylines(ofPolylines& polylines, 
-                             ofxClipperPolyType clipperType,
-                             ClipperLib::long64 xScale,
-                             ClipperLib::long64 yScale) {
+bool ofxClipper::addPolylines(ofxPolylines& polylines, 
+                             ofxClipperPolyType clipperType) {
     
     
     ClipperLib::Polygons out;
-    ofPolylinesToPolygons(polylines, out, xScale, yScale);
+    ofxPolylines_to_Polygons(polylines, out);
     AddPolygons(out,(ClipperLib::PolyType)clipperType);
 }
 
 //--------------------------------------------------------------
 bool ofxClipper::addPolyline(ofPolyline& polyline, 
-                             ofxClipperPolyType clipperType,
-                             ClipperLib::long64 xScale,
-                             ClipperLib::long64 yScale) {
-    ClipperLib::Polygon out = ofPolylineToPolygon(polyline,xScale,yScale);
+                             ofxClipperPolyType clipperType) {
+    ClipperLib::Polygon out = ofPolyline_to_Polygon(polyline);
     AddPolygon(out,(ClipperLib::PolyType)clipperType);
 }
 //--------------------------------------------------------------
 bool ofxClipper::addRectangle(ofRectangle& rectangle, 
-                              ofxClipperPolyType clipperType,
-                              ClipperLib::long64 xScale,
-                              ClipperLib::long64 yScale) {
+                              ofxClipperPolyType clipperType) {
     
     ofPolyline r;
     r.addVertex(ofPoint(rectangle.x,rectangle.y));
@@ -60,29 +52,22 @@ bool ofxClipper::addRectangle(ofRectangle& rectangle,
     r.addVertex(ofPoint(rectangle.x,rectangle.y+rectangle.height));
     r.close();
 
-    ClipperLib::Polygon out = ofPolylineToPolygon(r,xScale,yScale);
+    ClipperLib::Polygon out = ofPolyline_to_Polygon(r);
     AddPolygon(out,(ClipperLib::PolyType)clipperType);
 }
 
 //--------------------------------------------------------------
 bool ofxClipper::clip(ofxClipperClipType clipType, 
-                      ofPolylines &solution,
+                      ofxPolylines &solution,
                       ofPolyWindingMode subFillType,
-                      ofPolyWindingMode clipFillType,
-                      ClipperLib::long64 xScale,
-                      ClipperLib::long64 yScale) {
-    
+                      ofPolyWindingMode clipFillType) {
     m_UseFullRange = true; // need this for our conversions
-    
     ClipperLib::Polygons out;
-    
     bool success = Execute((ClipperLib::ClipType)clipType,
                             out,
                             convertWindingType(subFillType),
                             convertWindingType(clipFillType));
-        
-    polygonsToofPolylines(out,solution,xScale,yScale);
-    
+    polygons_to_ofxPolylines(out,solution);
     return success;
 }
 
@@ -94,172 +79,145 @@ void ofxClipper::clear() {
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-void ofPathToPolygons(ofPath& path, 
-                                  ClipperLib::Polygons& polygons,
-                                  ClipperLib::long64 xScale,
-                                  ClipperLib::long64 yScale) {
-    
-    return ofPolylinesToPolygons(path.getOutline(),polygons,xScale,yScale);
-
+void ofxClipper::ofPath_to_Polygons(ofPath& path,ClipperLib::Polygons& polygons) {
+    return ofxPolylines_to_Polygons(path.getOutline(),polygons);
 }
 //--------------------------------------------------------------
-ClipperLib::Polygon ofPolylineToPolygon(ofPolyline& polyline,
-                                        ClipperLib::long64 xScale,
-                                        ClipperLib::long64 yScale) {
-
+ClipperLib::Polygon ofPolylineToPolygon(ofPolyline& polyline) {
 	vector<ofPoint> verts = polyline.getVertices();
     vector<ofPoint>::iterator iter;
     ClipperLib::Polygon polygon;
-    
     for(iter = verts.begin(); iter != verts.end(); iter++) {
-        ClipperLib::IntPoint ip((*iter).x * xScale, 
-                                (*iter).y * yScale);
+        ClipperLib::IntPoint ip((*iter).x * clipperGlobalScale, 
+                                (*iter).y * clipperGlobalScale);
         polygon.push_back(ip);
     }
-    
     return polygon;
     
 }
 //--------------------------------------------------------------
-void ofPolylinesToPolygons(ofPolylines& polylines, 
-                           ClipperLib::Polygons& polygons,
-                           ClipperLib::long64 xScale,
-                           ClipperLib::long64 yScale) {
-    
+void ofxClipper::ofxPolylines_to_Polygons(ofxPolylines& polylines,ClipperLib::Polygons& polygons) {
     vector<ofPolyline>::iterator iter;
     for(iter = polylines.begin(); iter != polylines.end(); iter++) {
-        polygons.push_back(ofPolylineToPolygon((*iter),xScale,yScale));
+        polygons.push_back(ofPolylineToPolygon((*iter)));
     }
-    
 }
 
 //--------------------------------------------------------------
-ofPolyline polygonToofPolyline(ClipperLib::Polygon& polygon,
-                               ClipperLib::long64 xScale,
-                               ClipperLib::long64 yScale) {
-
+ofPolyline ofxClipper::polygon_to_ofPolyline(ClipperLib::Polygon& polygon) {
     vector<ClipperLib::IntPoint>::iterator iter;
     ofPolyline polyline;
-    
     for(iter = polygon.begin(); iter != polygon.end(); iter++) {
-        ofPoint pnt((*iter).X / double(xScale),  // bring back to our coords
-                    (*iter).Y / double(yScale)); // bring back to our coords
+        ofPoint pnt((*iter).X / double(clipperGlobalScale),  // bring back to our coords
+                    (*iter).Y / double(clipperGlobalScale)); // bring back to our coords
         polyline.addVertex(pnt);
     }
-    
     polyline.close(); // close it
-
     return polyline;
 }
 
 //--------------------------------------------------------------
-void polygonsToofPolylines(ClipperLib::Polygons& polygons, 
-                           ofPolylines& polylines,
-                           ClipperLib::long64 xScale,
-                           ClipperLib::long64 yScale) {
-    
+void ofxClipper::polygons_to_ofxPolylines(ClipperLib::Polygons& polygons,ofxPolylines& polylines) {
     vector<ClipperLib::Polygon>::iterator iter;
     for(iter = polygons.begin(); iter != polygons.end(); iter++) {
-        polylines.push_back(polygonToofPolyline((*iter),xScale,yScale));
+        polylines.push_back(polygon_to_ofPolyline((*iter)));
     }
-    
 }
 
 
 // utility functions
 //--------------------------------------------------------------
-bool Orientation(ofPolyline &poly,
-                 ClipperLib::long64 xScale,
-                 ClipperLib::long64 yScale) {
-    
-    return ClipperLib::Orientation(ofPolylineToPolygon(poly,xScale,yScale));
+bool ofxClipper::Orientation(ofPolyline &poly) {
+    return ClipperLib::Orientation(ofPolylineToPolygon(poly));
 }
 
 //--------------------------------------------------------------
-double Area(ofPolyline &poly,
-            ClipperLib::long64 xScale,
-            ClipperLib::long64 yScale) {
-
-    return ClipperLib::Area(ofPolylineToPolygon(poly,xScale,yScale));
-
+double Area(ofPolyline &poly) {
+    return ClipperLib::Area(ofPolylineToPolygon(poly));
 }
 
 //--------------------------------------------------------------
-void OffsetPolygons(ofPolylines &in_polys, 
-                    ofPolylines &out_polys,
-                    double delta, 
+void ofxClipper::OffsetPolylines(ofxPolylines &in_polys, 
+                    ofxPolylines &out_polys,
+                    double offset, 
                     ofxClipperJoinType jointype, 
-                    double MiterLimit,
-                    ClipperLib::long64 xScale,
-                    ClipperLib::long64 yScale) {
+                    double MiterLimit) {
     
-    delta = delta * xScale;
-    MiterLimit = MiterLimit * xScale;
+    offset = offset * clipperGlobalScale;
+    MiterLimit = MiterLimit * clipperGlobalScale;
     
     ClipperLib::Polygons in, out;
-    ofPolylinesToPolygons(in_polys,in,xScale,yScale);
-    OffsetPolygons(in,out,delta,(ClipperLib::JoinType)jointype,MiterLimit);
-    polygonsToofPolylines(out,out_polys,xScale,yScale);
+    ofxPolylines_to_Polygons(in_polys,in);
+    OffsetPolygons(in,out,offset,(ClipperLib::JoinType)jointype,MiterLimit);
+    polygons_to_ofxPolylines(out,out_polys);
 }
 
 //--------------------------------------------------------------
-void SimplifyPolygon(ofPolyline &in_poly, 
-                     ofPolylines  &out_polys,
-                     ClipperLib::long64 xScale,
-                     ClipperLib::long64 yScale) {
+void ofxClipper::SimplifyPolyline(ofPolyline &in_poly, 
+                     ofxPolylines  &out_polys) {
     ClipperLib::Polygon in;
     ClipperLib::Polygons out;
-    in = ofPolylineToPolygon(in_poly,xScale,yScale);
+    in = ofPolylineToPolygon(in_poly);
     ClipperLib::SimplifyPolygon(in,out);
-    polygonsToofPolylines(out,out_polys,xScale,yScale);
+    polygons_to_ofxPolylines(out,out_polys);
 }
 
 //--------------------------------------------------------------
-void SimplifyPolygons(ofPolylines &in_polys, 
-                      ofPolylines &out_polys,
-                      ClipperLib::long64 xScale,
-                      ClipperLib::long64 yScale) {
+void ofxClipper::SimplifyPolylines(ofxPolylines &in_polys, 
+                      ofxPolylines &out_polys) {
     ClipperLib::Polygons in;
     ClipperLib::Polygons out;
-    ofPolylinesToPolygons(in_polys,in,xScale,yScale);
+    ofxPolylines_to_Polygons(in_polys,in);
     ClipperLib::SimplifyPolygons(in,out);
-    polygonsToofPolylines(out,out_polys,xScale,yScale);
+    polygons_to_ofxPolylines(out,out_polys);
 }
 
 //--------------------------------------------------------------
-void SimplifyPolygons(ofPolylines &polys,
-                      ClipperLib::long64 xScale,
-                      ClipperLib::long64 yScale) {
+void ofxClipper::SimplifyPolylines(ofxPolylines &polys) {
     ClipperLib::Polygons in;
-    ofPolylinesToPolygons(polys,in,xScale,yScale);
+    ofxPolylines_to_Polygons(polys,in);
     ClipperLib::SimplifyPolygons(in);
     polys.clear();
-    polygonsToofPolylines(in,polys,xScale,yScale);
+    polygons_to_ofxPolylines(in,polys);
 }
 
 //--------------------------------------------------------------
-void ReversePoints(ofPolyline& poly,
-                   ClipperLib::long64 xScale,
-                   ClipperLib::long64 yScale) {
+void ofxClipper::SimplifyPath(ofPath &path, ofxPolylines &out_polys) {
+    ClipperLib::Polygons in,out;
+    ofPath_to_Polygons(path, in);
+    ClipperLib::SimplifyPolygons(in,out);
+    out_polys.clear();
+    polygons_to_ofxPolylines(out,out_polys);
+}
+
+//--------------------------------------------------------------
+void ofxClipper::ReversePolyline(ofPolyline& poly) {
     ClipperLib::Polygon in;
-    in = ofPolylineToPolygon(poly,xScale,yScale);
+    in = ofPolylineToPolygon(poly);
     ClipperLib::ReversePoints(in);
-    poly = polygonToofPolyline(in,xScale,yScale);
+    poly = polygon_to_ofPolyline(in);
 }
 
 //--------------------------------------------------------------
-void ReversePoints(ofPolylines& polys,
-                   ClipperLib::long64 xScale,
-                   ClipperLib::long64 yScale) {
+void ofxClipper::ReversePolylines(ofxPolylines& polys) {
     ClipperLib::Polygons in;
-    ofPolylinesToPolygons(polys,in,xScale,yScale);
+    ofxPolylines_to_Polygons(polys,in);
     ClipperLib::ReversePoints(in);
     polys.clear();
-    polygonsToofPolylines(in,polys,xScale,yScale);
+    polygons_to_ofxPolylines(in,polys);
 }
 
 //--------------------------------------------------------------
-ClipperLib::PolyFillType convertWindingType(ofPolyWindingMode windingMode) {
+void ofxClipper::ReversePath(ofPath& path, ofxPolylines &out_polys) {
+    ClipperLib::Polygons in;
+    ofPath_to_Polygons(path, in);
+    ClipperLib::ReversePoints(in);
+    out_polys.clear();
+    polygons_to_ofxPolylines(in,out_polys);
+}
+
+//--------------------------------------------------------------
+ClipperLib::PolyFillType ofxClipper::convertWindingType(ofPolyWindingMode windingMode) {
     
     enum PolyFillType { pftEvenOdd, pftNonZero, pftPositive, pftNegative };
     
@@ -281,4 +239,9 @@ ClipperLib::PolyFillType convertWindingType(ofPolyWindingMode windingMode) {
             return ClipperLib::pftEvenOdd;
             break;
     }
+}
+
+//--------------------------------------------------------
+void ofxClipper::setGlobalScale(long long newScale) {
+    clipperGlobalScale = newScale;
 }

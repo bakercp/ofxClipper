@@ -42,6 +42,14 @@ void testApp::setup(){
     miterLimitSlider.addListener(this,&testApp::miterLimit);
     offsetDeltaSlider.addListener(this,&testApp::offsetDelta);
 
+    simplifyPanel.setup("Simplify","settings.xml", ofGetWidth()-100,10);
+    simplifyPanel.add(simplifyPath.setup("num vertices",10,3,40));
+    simplifyPath.addListener(this,&testApp::genSimplifyPath);
+    
+    genSimplifyPath(simplifyPath);
+    bSimplifyPathNeedsUpdate = true;
+
+    
     // generate some initial data
     genSubjects(nClipSubjects);
     genMasks(nClipMasks);
@@ -69,15 +77,18 @@ void testApp::update(){
         // execute the clipping operation based on the current clipping type
         clipper.clip(currentClipperType,clips);
         
+        if(bSimplifyPathNeedsUpdate) {
+            ofxClipper::SimplifyPath(complexPath, simplifiedPath);
+        }
         
         // if we have offsets enabled, generate the offsets
         if(enableOffsetsToggle) {
             offsets.clear();
-            OffsetPolygons(clips, 
-                           offsets, 
-                           offsetDeltaSlider,
-                           currentClipperJoinType,
-                           miterLimitSlider);
+            ofxClipper::OffsetPolylines(clips, 
+                                       offsets, 
+                                       offsetDeltaSlider,
+                                       currentClipperJoinType,
+                                       miterLimitSlider);
         }
         
         
@@ -172,6 +183,15 @@ void testApp::draw(){
     
     ofPopMatrix();
     
+    
+    ofPushMatrix();
+    ofTranslate(ofGetWidth() * 2 / 4, 100);
+    complexPath.draw();
+    for(int i = 0; i < simplifiedPath.size(); i++) {
+        ofSetColor(255,255,0);
+        simplifiedPath[i].draw();
+    }
+    ofPopMatrix();
     
     // draw the gui
     ////////////////////////////////////////////////
@@ -416,4 +436,13 @@ void testApp::mouseClipper(bool & b) {
     bNeedsUpdate = true;
 }
 
+//--------------------------------------------------------------
+void testApp::genSimplifyPath(int &ct) {
+
+    complexPath.clear();
+    for(int i = 0; i < ct; i++) complexPath.lineTo(ofPoint(ofRandom(-80,80),ofRandom(-80,80)));
+    complexPath.close();
+        
+    bSimplifyPathNeedsUpdate = true;
+}
 
