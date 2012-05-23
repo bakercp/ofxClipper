@@ -260,16 +260,6 @@ void testApp::genSubjects(int & ct) {
 //--------------------------------------------------------------
 void testApp::genMasks(int & ct) {
     
-    cout << "Gen maskes! cnt=" << ct << endl;
-    
-    if(mclip) {
-        cout << "mouse clipper is on!" << endl;   
-    } else {
-        cout << "mouse clipper is off" << endl;
-    }
-    
-    cout << "in here!" << endl;
-    
     clipMasks.clear();
     ofPoint screenCtr = ofPoint(ofGetWidth()/2, ofGetHeight()/2);
 
