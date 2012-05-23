@@ -7,7 +7,7 @@
 enum TestPolyType {
     CIRCLES,
     SQUARES,
-    RANDOM_POLY
+    RANDOM_POLY,
 };
 
 class testApp : public ofBaseApp {
@@ -17,10 +17,10 @@ public:
     void update();
     void draw();
 
-    void mouseDragged(int x, int y, int button);
-    void mousePressed(int x, int y, int button);
-    void mouseReleased(int x, int y, int button);
-    
+    void mouseMoved( int x, int y );
+    void mousePressed( int x, int y, int button);
+    void mouseReleased( int x, int y, int button);
+
     ofxClipper clipper;
     bool bNeedsUpdate;
 
@@ -45,7 +45,8 @@ public:
     ofxIntSlider maskTypeSlider;
     ofxIntSlider nClipSubjects;
     ofxIntSlider subjectTypeSlider;
-    
+    ofxToggle      useMouseClipper;
+
     
     ofxPanel offsetPanel;
     ofxIntSlider joinTypeSlider;
@@ -64,7 +65,10 @@ public:
     void subjectPolyType(int & ct);
     void maskPolyType(int & ct);
     
+    void mouseClipper(bool & b);
     
+    void makeMouseClip();
+    bool mclip;
     
     
 };

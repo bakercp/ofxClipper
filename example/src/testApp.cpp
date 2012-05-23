@@ -20,6 +20,9 @@ void testApp::setup(){
     clipTypePanel.add(     nClipSubjects.setup("# clip subjects",2,1,100));
     clipTypePanel.add(   maskTypeSlider.setup("CLIP POLYS: CIRCLES",0,0,2));
     clipTypePanel.add(nClipMasks.setup("# clip masks   ",1,1,100));
+    clipTypePanel.add(useMouseClipper.setup("Use Mouse Clip Mask", true));
+               
+    useMouseClipper.addListener(this,&testApp::mouseClipper);
     
     clipTypeSlider.addListener(this,&testApp::clipType);
     
@@ -31,7 +34,7 @@ void testApp::setup(){
     
     offsetPanel.setup("offsets","settings.xml", 10, 200);
     offsetPanel.add(enableOffsetsToggle.setup("show offset", true));
-    offsetPanel.add(offsetDeltaSlider.setup("offset delta",10,0,100));
+    offsetPanel.add(offsetDeltaSlider.setup("offset delta",20,-200,200));
     offsetPanel.add(joinTypeSlider.setup("TYPE: SQUARE",0,0,2));
     offsetPanel.add(miterLimitSlider.setup("miter limit",2,0,30));
     
@@ -43,7 +46,7 @@ void testApp::setup(){
     genSubjects(nClipSubjects);
     genMasks(nClipMasks);
 
-    
+    mclip = useMouseClipper;
     
 }
 
@@ -98,8 +101,8 @@ void testApp::draw(){
     int h = 12;
     int w = 30;
     
-    ofColor cSubject(255,0,0,127);
-    ofColor cMask(255,255,0,127);
+    ofColor cSubject(255,0,0,200);
+    ofColor cMask(255,255,0,200);
     ofColor cResult(0,255,0,200);
     ofColor cOffset(0,0,255,200);
     
@@ -183,18 +186,30 @@ void testApp::draw(){
 }
 
 //--------------------------------------------------------------
-void testApp::mouseDragged(int x, int y, int button){
-
+void testApp::makeMouseClip() {
+    if(mclip) {
+        clipMasks.clear();
+        ofPolyline p;
+        ofPoint ctr = ofPoint(ofGetMouseX() + ofGetWidth() / 4, ofGetMouseY());
+        p.arc(ctr,100,100,0,360);
+        p.close();
+        clipMasks.push_back(p);
+        bNeedsUpdate = true;
+    }
 }
 
 //--------------------------------------------------------------
-void testApp::mousePressed(int x, int y, int button){
-
+void testApp::mousePressed( int x, int y, int button ) {
+    makeMouseClip();
+}
+//--------------------------------------------------------------
+void testApp::mouseReleased( int x, int y, int button ) {
+    makeMouseClip();
 }
 
 //--------------------------------------------------------------
-void testApp::mouseReleased(int x, int y, int button){
-
+void testApp::mouseMoved( int x, int y ) {
+    makeMouseClip();
 }
 
 //--------------------------------------------------------------
@@ -231,8 +246,7 @@ void testApp::genSubjects(int & ct) {
         ofPolyline r;
         
         for(int i = 0; i < ct; i++) {
-            ofPoint ctr = screenCtr + ofPoint(ofRandom(-100,100),ofRandom(-100,100)); 
-            cout << ctr << endl;
+            ofPoint ctr = screenCtr + ofPoint(ofRandom(-150,150),ofRandom(-150,150)); 
             r.addVertex(ctr);
         }
         r.close();
@@ -245,6 +259,17 @@ void testApp::genSubjects(int & ct) {
 
 //--------------------------------------------------------------
 void testApp::genMasks(int & ct) {
+    
+    cout << "Gen maskes! cnt=" << ct << endl;
+    
+    if(mclip) {
+        cout << "mouse clipper is on!" << endl;   
+    } else {
+        cout << "mouse clipper is off" << endl;
+    }
+    
+    cout << "in here!" << endl;
+    
     clipMasks.clear();
     ofPoint screenCtr = ofPoint(ofGetWidth()/2, ofGetHeight()/2);
 
@@ -275,12 +300,13 @@ void testApp::genMasks(int & ct) {
     if(clipMaskType == RANDOM_POLY) {
         ofPolyline r;
         for(int i = 0; i < ct; i++) {
-            ofPoint ctr = screenCtr + ofPoint(ofRandom(-100,100),ofRandom(-100,100)); 
+            ofPoint ctr = screenCtr + ofPoint(ofRandom(-150,150),ofRandom(-150,150)); 
             r.addVertex(ctr);
         }
         r.close();
         clipMasks.push_back(r);
     }
+    
 
     bNeedsUpdate = true;
 }
@@ -383,7 +409,21 @@ void testApp::maskPolyType(int & ct) {
     bNeedsUpdate = true;
 }
 
+//--------------------------------------------------------------
 void testApp::offsetDelta(float & f) {
     bNeedsUpdate = true;
 }
+
+//--------------------------------------------------------------
+void testApp::mouseClipper(bool & b) {
+
+    mclip = b;
+    
+    if(!mclip) {
+        genMasks(nClipMasks);
+    }
+    
+    bNeedsUpdate = true;
+}
+
 
