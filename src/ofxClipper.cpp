@@ -109,8 +109,8 @@ ClipperLib::Polygon ofxClipper::ofPolyline_to_Polygon(ofPolyline& polyline) {
         polygon.push_back(ip);
     }
     return polygon;
-    
 }
+
 //--------------------------------------------------------------
 void ofxClipper::ofxPolylines_to_Polygons(ofxPolylines& polylines,ClipperLib::Polygons& polygons) {
     vector<ofPolyline>::iterator iter;
@@ -251,7 +251,7 @@ ClipperLib::PolyFillType ofxClipper::convertWindingType(ofPolyWindingMode windin
             return ClipperLib::pftNegative;
             break;
         case OF_POLY_WINDING_ABS_GEQ_TWO:
-            ofLog(OF_LOG_WARNING,"ofxClipper::OF_POLY_WINDING_ABS_GEQ_TWO not implemented by clipper, using OF_POLY_WINDING_ODD");
+            ofLogWarning("ofxClipper") << " OF_POLY_WINDING_ABS_GEQ_TWO not implemented by clipper, using OF_POLY_WINDING_ODD";
             return ClipperLib::pftEvenOdd;
             break;
     }
