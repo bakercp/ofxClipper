@@ -24,6 +24,7 @@
 		E4C2424810CC5A17004149E2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4C2424510CC5A17004149E2 /* Cocoa.framework */; };
 		E4C2424910CC5A17004149E2 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4C2424610CC5A17004149E2 /* IOKit.framework */; };
 		E4EB6799138ADC1D00A09F29 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBAB23BE13894E4700AA2426 /* GLUT.framework */; };
+		FD3857B515DC8C5F00C36689 /* clipper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD3857B115DC8C5F00C36689 /* clipper.cpp */; };
 		FD765AE6156C204C000A88E9 /* ofxBaseGui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD765ADB156C204C000A88E9 /* ofxBaseGui.cpp */; };
 		FD765AE7156C204C000A88E9 /* ofxButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD765ADD156C204C000A88E9 /* ofxButton.cpp */; };
 		FD765AE8156C204C000A88E9 /* ofxPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD765AE0156C204C000A88E9 /* ofxPanel.cpp */; };
@@ -33,7 +34,6 @@
 		FD765AF6156C2079000A88E9 /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD765AF0156C2079000A88E9 /* tinyxmlerror.cpp */; };
 		FD765AF7156C2079000A88E9 /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD765AF1156C2079000A88E9 /* tinyxmlparser.cpp */; };
 		FD765AF8156C2079000A88E9 /* ofxXmlSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD765AF3156C2079000A88E9 /* ofxXmlSettings.cpp */; };
-		FDFF6FE4156B5F67000106D8 /* clipper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FDFF6FD2156B5F67000106D8 /* clipper.cpp */; };
 		FDFF6FE9156B5F96000106D8 /* ofxClipper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FDFF6FE8156B5F96000106D8 /* ofxClipper.cpp */; };
 /* End PBXBuildFile section */
 
@@ -89,6 +89,10 @@
 		E4C2424610CC5A17004149E2 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		E4EB691F138AFCF100A09F29 /* CoreOF.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = CoreOF.xcconfig; path = ../../../libs/openFrameworksCompiled/project/osx/CoreOF.xcconfig; sourceTree = SOURCE_ROOT; };
 		E4EB6923138AFD0F00A09F29 /* Project.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
+		FD3857B115DC8C5F00C36689 /* clipper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clipper.cpp; sourceTree = "<group>"; };
+		FD3857B215DC8C5F00C36689 /* clipper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = clipper.hpp; sourceTree = "<group>"; };
+		FD3857B315DC8C5F00C36689 /* License.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = License.txt; sourceTree = "<group>"; };
+		FD3857B415DC8C5F00C36689 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		FD765AD9156C204C000A88E9 /* ofOscParameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofOscParameter.h; sourceTree = "<group>"; };
 		FD765ADA156C204C000A88E9 /* ofParameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofParameter.h; sourceTree = "<group>"; };
 		FD765ADB156C204C000A88E9 /* ofxBaseGui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxBaseGui.cpp; sourceTree = "<group>"; };
@@ -108,8 +112,6 @@
 		FD765AF1156C2079000A88E9 /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlparser.cpp; sourceTree = "<group>"; };
 		FD765AF3156C2079000A88E9 /* ofxXmlSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxXmlSettings.cpp; sourceTree = "<group>"; };
 		FD765AF4156C2079000A88E9 /* ofxXmlSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxXmlSettings.h; sourceTree = "<group>"; };
-		FDFF6FD2156B5F67000106D8 /* clipper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clipper.cpp; sourceTree = "<group>"; };
-		FDFF6FD3156B5F67000106D8 /* clipper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = clipper.hpp; sourceTree = "<group>"; };
 		FDFF6FE7156B5F8C000106D8 /* ofxClipper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ofxClipper.h; sourceTree = "<group>"; };
 		FDFF6FE8156B5F96000106D8 /* ofxClipper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxClipper.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -225,6 +227,42 @@
 			name = openFrameworks;
 			sourceTree = "<group>";
 		};
+		FD38578A15DC88DC00C36689 /* libs */ = {
+			isa = PBXGroup;
+			children = (
+				FD3857AE15DC8C5F00C36689 /* clipper */,
+			);
+			name = libs;
+			path = ../libs;
+			sourceTree = "<group>";
+		};
+		FD3857AE15DC8C5F00C36689 /* clipper */ = {
+			isa = PBXGroup;
+			children = (
+				FD3857AF15DC8C5F00C36689 /* src */,
+			);
+			path = clipper;
+			sourceTree = "<group>";
+		};
+		FD3857AF15DC8C5F00C36689 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				FD3857B015DC8C5F00C36689 /* cpp */,
+				FD3857B315DC8C5F00C36689 /* License.txt */,
+				FD3857B415DC8C5F00C36689 /* README */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		FD3857B015DC8C5F00C36689 /* cpp */ = {
+			isa = PBXGroup;
+			children = (
+				FD3857B115DC8C5F00C36689 /* clipper.cpp */,
+				FD3857B215DC8C5F00C36689 /* clipper.hpp */,
+			);
+			path = cpp;
+			sourceTree = "<group>";
+		};
 		FD765AD7156C204C000A88E9 /* ofxGui */ = {
 			isa = PBXGroup;
 			children = (
@@ -287,36 +325,10 @@
 		FDFF6FCE156B5F57000106D8 /* ofxClipper */ = {
 			isa = PBXGroup;
 			children = (
-				FDFF6FCF156B5F67000106D8 /* lib */,
+				FD38578A15DC88DC00C36689 /* libs */,
 				FDFF6FE3156B5F67000106D8 /* src */,
 			);
 			name = ofxClipper;
-			sourceTree = "<group>";
-		};
-		FDFF6FCF156B5F67000106D8 /* lib */ = {
-			isa = PBXGroup;
-			children = (
-				FDFF6FD0156B5F67000106D8 /* clipper */,
-			);
-			name = lib;
-			path = ../lib;
-			sourceTree = "<group>";
-		};
-		FDFF6FD0156B5F67000106D8 /* clipper */ = {
-			isa = PBXGroup;
-			children = (
-				FDFF6FD1156B5F67000106D8 /* cpp */,
-			);
-			path = clipper;
-			sourceTree = "<group>";
-		};
-		FDFF6FD1156B5F67000106D8 /* cpp */ = {
-			isa = PBXGroup;
-			children = (
-				FDFF6FD2156B5F67000106D8 /* clipper.cpp */,
-				FDFF6FD3156B5F67000106D8 /* clipper.hpp */,
-			);
-			path = cpp;
 			sourceTree = "<group>";
 		};
 		FDFF6FE3156B5F67000106D8 /* src */ = {
@@ -415,7 +427,6 @@
 			files = (
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* testApp.cpp in Sources */,
-				FDFF6FE4156B5F67000106D8 /* clipper.cpp in Sources */,
 				FDFF6FE9156B5F96000106D8 /* ofxClipper.cpp in Sources */,
 				FD765AE6156C204C000A88E9 /* ofxBaseGui.cpp in Sources */,
 				FD765AE7156C204C000A88E9 /* ofxButton.cpp in Sources */,
@@ -426,6 +437,7 @@
 				FD765AF6156C2079000A88E9 /* tinyxmlerror.cpp in Sources */,
 				FD765AF7156C2079000A88E9 /* tinyxmlparser.cpp in Sources */,
 				FD765AF8156C2079000A88E9 /* ofxXmlSettings.cpp in Sources */,
+				FD3857B515DC8C5F00C36689 /* clipper.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
