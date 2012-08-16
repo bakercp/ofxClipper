@@ -79,10 +79,17 @@ public:
                         double offset, 
                         ofxClipperJoinType jointype = OFX_CLIPPER_JOINTYPE_SQUARE, 
                         double MiterLimit = 2);
-    static void SimplifyPolyline(ofPolyline &in_poly,ofxPolylines  &out_polys);
-    static void SimplifyPolylines(ofxPolylines &in_polys,ofxPolylines &out_polys);
-    static void SimplifyPolylines(ofxPolylines &polys);
-    static void SimplifyPath(ofPath &path, ofxPolylines &out_polys);
+    static void SimplifyPolyline(ofPolyline &in_poly,
+                                 ofxPolylines &out_polys,
+                                 ofPolyWindingMode windingMode = OF_POLY_WINDING_ODD);
+    static void SimplifyPolylines(ofxPolylines &in_polys,
+                                  ofxPolylines &out_polys,
+                                  ofPolyWindingMode windingMode = OF_POLY_WINDING_ODD);
+    static void SimplifyPolylines(ofxPolylines &polys,
+                                  ofPolyWindingMode windingMode = OF_POLY_WINDING_ODD);
+    static void SimplifyPath(ofPath &path,
+                             ofxPolylines &out_polys,
+                             ofPolyWindingMode windingMode = OF_POLY_WINDING_ODD);
     static void ReversePolyline(ofPolyline& p);
     static void ReversePolylines(ofxPolylines& p);
     static void ReversePath(ofPath& p,ofxPolylines &out_polys);
@@ -99,7 +106,7 @@ public:
     static ofPolyline polygon_to_ofPolyline(ClipperLib::Polygon& polygon);
     static void polygons_to_ofxPolylines(ClipperLib::Polygons& polygons, ofxPolylines& polylines);
 
-    static ClipperLib::PolyFillType convertWindingType(ofPolyWindingMode windingMode);
+    static ClipperLib::PolyFillType convertWindingMode(ofPolyWindingMode windingMode);
 
     
 };

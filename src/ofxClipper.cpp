@@ -81,8 +81,8 @@ bool ofxClipper::clip(ofxClipperClipType clipType,
     ClipperLib::Polygons out;
     bool success = Execute((ClipperLib::ClipType)clipType,
                             out,
-                            convertWindingType(subFillType),
-                            convertWindingType(clipFillType));
+                            convertWindingMode(subFillType),
+                            convertWindingMode(clipFillType));
     polygons_to_ofxPolylines(out,solution);
     return success;
 }
@@ -170,38 +170,43 @@ void ofxClipper::OffsetPolylines(ofxPolylines &in_polys,
 
 //--------------------------------------------------------------
 void ofxClipper::SimplifyPolyline(ofPolyline &in_poly, 
-                     ofxPolylines  &out_polys) {
+                     ofxPolylines  &out_polys,
+                     ofPolyWindingMode windingMode) {
     ClipperLib::Polygon in;
     ClipperLib::Polygons out;
     in = ofPolyline_to_Polygon(in_poly);
-    ClipperLib::SimplifyPolygon(in,out);
+    ClipperLib::SimplifyPolygon(in,out, convertWindingMode(windingMode));
     polygons_to_ofxPolylines(out,out_polys);
 }
 
 //--------------------------------------------------------------
 void ofxClipper::SimplifyPolylines(ofxPolylines &in_polys, 
-                      ofxPolylines &out_polys) {
+                      ofxPolylines &out_polys,
+                      ofPolyWindingMode windingMode) {
     ClipperLib::Polygons in;
     ClipperLib::Polygons out;
     ofxPolylines_to_Polygons(in_polys,in);
-    ClipperLib::SimplifyPolygons(in,out);
+    ClipperLib::SimplifyPolygons(in,out,convertWindingMode(windingMode));
     polygons_to_ofxPolylines(out,out_polys);
 }
 
 //--------------------------------------------------------------
-void ofxClipper::SimplifyPolylines(ofxPolylines &polys) {
+void ofxClipper::SimplifyPolylines(ofxPolylines &polys,
+                                   ofPolyWindingMode windingMode) {
     ClipperLib::Polygons in;
     ofxPolylines_to_Polygons(polys,in);
-    ClipperLib::SimplifyPolygons(in);
+    ClipperLib::SimplifyPolygons(in,convertWindingMode(windingMode));
     polys.clear();
     polygons_to_ofxPolylines(in,polys);
 }
 
 //--------------------------------------------------------------
-void ofxClipper::SimplifyPath(ofPath &path, ofxPolylines &out_polys) {
+void ofxClipper::SimplifyPath(ofPath &path,
+                              ofxPolylines &out_polys,
+                              ofPolyWindingMode windingMode) {
     ClipperLib::Polygons in,out;
     ofPath_to_Polygons(path, in);
-    ClipperLib::SimplifyPolygons(in,out);
+    ClipperLib::SimplifyPolygons(in,out,convertWindingMode(windingMode));
     out_polys.clear();
     polygons_to_ofxPolylines(out,out_polys);
 }
@@ -210,7 +215,7 @@ void ofxClipper::SimplifyPath(ofPath &path, ofxPolylines &out_polys) {
 void ofxClipper::ReversePolyline(ofPolyline& poly) {
     ClipperLib::Polygon in;
     in = ofPolyline_to_Polygon(poly);
-    ClipperLib::ReversePoints(in);
+    ClipperLib::ReversePolygon(in);
     poly = polygon_to_ofPolyline(in);
 }
 
@@ -218,7 +223,7 @@ void ofxClipper::ReversePolyline(ofPolyline& poly) {
 void ofxClipper::ReversePolylines(ofxPolylines& polys) {
     ClipperLib::Polygons in;
     ofxPolylines_to_Polygons(polys,in);
-    ClipperLib::ReversePoints(in);
+    ClipperLib::ReversePolygons(in);
     polys.clear();
     polygons_to_ofxPolylines(in,polys);
 }
@@ -227,15 +232,15 @@ void ofxClipper::ReversePolylines(ofxPolylines& polys) {
 void ofxClipper::ReversePath(ofPath& path, ofxPolylines &out_polys) {
     ClipperLib::Polygons in;
     ofPath_to_Polygons(path, in);
-    ClipperLib::ReversePoints(in);
+    ClipperLib::ReversePolygons(in);
     out_polys.clear();
     polygons_to_ofxPolylines(in,out_polys);
 }
 
 //--------------------------------------------------------------
-ClipperLib::PolyFillType ofxClipper::convertWindingType(ofPolyWindingMode windingMode) {
+ClipperLib::PolyFillType ofxClipper::convertWindingMode(ofPolyWindingMode windingMode) {
     
-    enum PolyFillType { pftEvenOdd, pftNonZero, pftPositive, pftNegative };
+    //enum PolyFillType { pftEvenOdd, pftNonZero, pftPositive, pftNegative };
     
     switch(windingMode) {
         case OF_POLY_WINDING_ODD:
