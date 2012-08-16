@@ -31,8 +31,6 @@
 #include "ofMain.h"
 #include "clipper.hpp"
 
-static int clipperGlobalScale = 1000000000;
-
 typedef vector<ofPolyline> ofxPolylines;
 
 enum ofxClipperClipType {

@@ -24,6 +24,8 @@
 
 #include "ofxClipper.h"
 
+static int clipperGlobalScale = 1000000000;
+
 //--------------------------------------------------------------
 ofxClipper::ofxClipper() {}
 
