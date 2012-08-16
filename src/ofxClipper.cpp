@@ -37,28 +37,26 @@ ofxClipper::~ofxClipper() {
 //--------------------------------------------------------------
 bool ofxClipper::addPath(ofPath& path, 
                          ofxClipperPolyType clipperType) {
-    
     ClipperLib::Polygons out;
     ofPath_to_Polygons(path,out);
-    AddPolygons(out,(ClipperLib::PolyType)clipperType);
+    return AddPolygons(out,(ClipperLib::PolyType)clipperType);
 }
 
 //--------------------------------------------------------------
 bool ofxClipper::addPolylines(ofxPolylines& polylines, 
                              ofxClipperPolyType clipperType) {
-    
-    
     ClipperLib::Polygons out;
     ofxPolylines_to_Polygons(polylines, out);
-    AddPolygons(out,(ClipperLib::PolyType)clipperType);
+    return AddPolygons(out,(ClipperLib::PolyType)clipperType);
 }
 
 //--------------------------------------------------------------
 bool ofxClipper::addPolyline(ofPolyline& polyline, 
                              ofxClipperPolyType clipperType) {
     ClipperLib::Polygon out = ofPolyline_to_Polygon(polyline);
-    AddPolygon(out,(ClipperLib::PolyType)clipperType);
+    return AddPolygon(out,(ClipperLib::PolyType)clipperType);
 }
+
 //--------------------------------------------------------------
 bool ofxClipper::addRectangle(ofRectangle& rectangle, 
                               ofxClipperPolyType clipperType) {
@@ -71,7 +69,7 @@ bool ofxClipper::addRectangle(ofRectangle& rectangle,
     r.close();
 
     ClipperLib::Polygon out = ofPolyline_to_Polygon(r);
-    AddPolygon(out,(ClipperLib::PolyType)clipperType);
+    return AddPolygon(out,(ClipperLib::PolyType)clipperType);
 }
 
 //--------------------------------------------------------------
