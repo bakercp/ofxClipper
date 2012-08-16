@@ -99,7 +99,7 @@ void ofxClipper::ofPath_to_Polygons(ofPath& path,ClipperLib::Polygons& polygons)
     return ofxPolylines_to_Polygons(path.getOutline(),polygons);
 }
 //--------------------------------------------------------------
-ClipperLib::Polygon ofPolylineToPolygon(ofPolyline& polyline) {
+ClipperLib::Polygon ofxClipper::ofPolyline_to_Polygon(ofPolyline& polyline) {
 	vector<ofPoint> verts = polyline.getVertices();
     vector<ofPoint>::iterator iter;
     ClipperLib::Polygon polygon;
@@ -115,7 +115,7 @@ ClipperLib::Polygon ofPolylineToPolygon(ofPolyline& polyline) {
 void ofxClipper::ofxPolylines_to_Polygons(ofxPolylines& polylines,ClipperLib::Polygons& polygons) {
     vector<ofPolyline>::iterator iter;
     for(iter = polylines.begin(); iter != polylines.end(); iter++) {
-        polygons.push_back(ofPolylineToPolygon((*iter)));
+        polygons.push_back(ofPolyline_to_Polygon((*iter)));
     }
 }
 
@@ -144,12 +144,12 @@ void ofxClipper::polygons_to_ofxPolylines(ClipperLib::Polygons& polygons,ofxPoly
 // utility functions
 //--------------------------------------------------------------
 bool ofxClipper::Orientation(ofPolyline &poly) {
-    return ClipperLib::Orientation(ofPolylineToPolygon(poly));
+    return ClipperLib::Orientation(ofPolyline_to_Polygon(poly));
 }
 
 //--------------------------------------------------------------
-double Area(ofPolyline &poly) {
-    return ClipperLib::Area(ofPolylineToPolygon(poly));
+double ofxClipper::Area(ofPolyline &poly) {
+    return ClipperLib::Area(ofPolyline_to_Polygon(poly));
 }
 
 //--------------------------------------------------------------
@@ -173,7 +173,7 @@ void ofxClipper::SimplifyPolyline(ofPolyline &in_poly,
                      ofxPolylines  &out_polys) {
     ClipperLib::Polygon in;
     ClipperLib::Polygons out;
-    in = ofPolylineToPolygon(in_poly);
+    in = ofPolyline_to_Polygon(in_poly);
     ClipperLib::SimplifyPolygon(in,out);
     polygons_to_ofxPolylines(out,out_polys);
 }
@@ -209,7 +209,7 @@ void ofxClipper::SimplifyPath(ofPath &path, ofxPolylines &out_polys) {
 //--------------------------------------------------------------
 void ofxClipper::ReversePolyline(ofPolyline& poly) {
     ClipperLib::Polygon in;
-    in = ofPolylineToPolygon(poly);
+    in = ofPolyline_to_Polygon(poly);
     ClipperLib::ReversePoints(in);
     poly = polygon_to_ofPolyline(in);
 }
