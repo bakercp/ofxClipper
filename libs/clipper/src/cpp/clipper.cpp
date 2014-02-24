@@ -2971,7 +2971,7 @@ void Clipper::JoinCommonEdges()
 }
 //------------------------------------------------------------------------------
 
-void ReversePolygons(Polygon& p)
+void ReversePolygon(Polygon& p)
 {
   std::reverse(p.begin(), p.end());
 }
@@ -2980,7 +2980,7 @@ void ReversePolygons(Polygon& p)
 void ReversePolygons(Polygons& p)
 {
   for (Polygons::size_type i = 0; i < p.size(); ++i)
-    ReversePolygons(p[i]);
+    ReversePolygon(p[i]);
 }
 
 //------------------------------------------------------------------------------
