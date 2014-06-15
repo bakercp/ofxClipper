@@ -30,8 +30,8 @@ void testApp::setup(){
     maskTypeSlider.addListener(this,&testApp::maskPolyType);
     subjectTypeSlider.addListener(this,&testApp::subjectPolyType);
     
-//    nClipMasks.addListener(this,&testApp::genMasks);              // ! results in poco non viable overload, how to fix?
-//    nClipSubjects.addListener(this,&testApp::genSubjects);        // ! results in poco non viable overload, how to fix?
+    //    nClipMasks.addListener(this,&testApp::genMasks);              // ! results in poco non viable overload, how to fix?
+    //    nClipSubjects.addListener(this,&testApp::genSubjects);        // ! results in poco non viable overload, how to fix?
     
     offsetPanel.setup("offsets","settings.xml", 10, 200);
     offsetPanel.add(enableOffsetsToggle.setup("show offset", true));
@@ -44,14 +44,13 @@ void testApp::setup(){
     endTypeSlider.addListener(this,&testApp::endType);
     miterLimitSlider.addListener(this,&testApp::miterLimit);
     offsetDeltaSlider.addListener(this,&testApp::offsetDelta);
-
+    
     simplifyPanel.setup("Simplify","settings.xml", ofGetWidth()-100,10);
     simplifyPanel.add(simplifyPath.setup("num vertices",10,3,40));
-//    simplifyPath.addListener(this,&testApp::genSimplifyPath);     // ! results in poco non viable overload, how to fix?
+    //    simplifyPath.addListener(this,&testApp::genSimplifyPath);     // ! results in poco non viable overload, how to fix?
     
     genSimplifyPath(simplifyPath);
     bSimplifyPathNeedsUpdate = true;
-
     
     // generate some initial data
     genSubjects(nClipSubjects);
@@ -71,26 +70,26 @@ void testApp::update(){
         // clear the clipper's internal polys
         clipper.clear();
         // add the clipper subjects (i.e. the things that will be clipped)
-        clipper.addPolylines(clipSubjects,OFX_CLIPPER_SUBJECT);
+        clipper.addPath(clipSubjects,OFX_CLIPPER_SUBJECT);
         
         // add the clipper masks (i.e. the things that will do the clipping)
-        clipper.addPolylines(clipMasks,OFX_CLIPPER_CLIP);
+        clipper.addPath(clipMasks,OFX_CLIPPER_CLIP);
 
         // execute the clipping operation based on the current clipping type
-        clipper.clip(currentClipperType,clips);
+        clipper.clip(currentClipperType,clips.getOutline());
         
         if(bSimplifyPathNeedsUpdate) {
-            ofxClipper::SimplifyPath(complexPath, simplifiedPath);
+            ofxClipper::SimplifyPath(complexPath, simplifiedPath.getOutline());
         }
         
         // if we have offsets enabled, generate the offsets
         if(enableOffsetsToggle) {
             offsets.clear();
-            ofxClipper::OffsetPolylines(clips, 
-                                       offsets, 
+            ofxClipper::OffsetPath(clips,
+                                       offsets,
                                        offsetDeltaSlider,
                                        currentClipperJoinType,
-                                       currentClipperEndType,
+                                       currentClipperEndType, 
                                        miterLimitSlider);
         }
         
@@ -153,36 +152,35 @@ void testApp::draw(){
     ofPushMatrix();
     ofTranslate(-ofGetWidth() / 4, 0);
 
-    for(int i = 0; i < clipSubjects.size(); i++) {
-        ofSetColor(cSubject);
-        ofNoFill();
-        clipSubjects[i].draw();
-    }
+    clipSubjects.setStrokeColor(cSubject);
+    clipSubjects.setStrokeWidth(1.0);
+    clipSubjects.setFilled(false);
+    clipSubjects.draw();
     
-    for(int i = 0; i < clipMasks.size(); i++) {
-        ofSetColor(cMask);
-        ofNoFill();
-        clipMasks[i].draw();
-    }
+    clipMasks.setStrokeColor(cMask);
+    clipMasks.setStrokeWidth(1.0);
+    clipMasks.setFilled(false);
+    clipMasks.draw();
+    
 
     ofPopMatrix();
     
     ofPushMatrix();
     ofTranslate(ofGetWidth() / 4, 0);
     
-    for(int i = 0; i < clips.size(); i++) {
-        ofSetColor(cResult);
-        ofNoFill();
-        clips[i].draw();
-    }
+    clips.setStrokeColor(cResult);
+    clips.setStrokeWidth(1.0);
+    clips.setFilled(false);
+    clips.draw();
 
     if(enableOffsetsToggle) {
-        for(int i = 0; i < offsets.size(); i++) {
-            ofSetColor(cOffset);
-            ofNoFill();
-            offsets[i].draw();
-        }
+        offsets.setStrokeColor(cOffset);
+        offsets.setStrokeWidth(1.0);
+        offsets.setFilled(false);
+        offsets.draw();
+        
     }
+    
     
     ofPopMatrix();
     
@@ -190,9 +188,9 @@ void testApp::draw(){
     ofPushMatrix();
     ofTranslate(ofGetWidth() * 2 / 4, 100);
     complexPath.draw();
-    for(int i = 0; i < simplifiedPath.size(); i++) {
+    for(int i = 0; i < simplifiedPath.getOutline().size(); i++) {
         ofSetColor(255,255,0);
-        simplifiedPath[i].draw();
+        simplifiedPath.getOutline()[i].draw();
     }
     ofPopMatrix();
     
@@ -216,7 +214,7 @@ void testApp::makeMouseClip() {
         ofPoint ctr = ofPoint(ofGetMouseX() + ofGetWidth() / 4, ofGetMouseY());
         p.arc(ctr,100,100,0,360);
         p.close();
-        clipMasks.push_back(p);
+        clipMasks.getOutline().push_back(p);
         bNeedsUpdate = true;
     }
 }
@@ -248,7 +246,7 @@ void testApp::genSubjects(ofxSlider<int> & ct) {
             ofPoint ctr = screenCtr + ofPoint(ofRandom(-100,100),ofRandom(-100,100)); 
             p.arc(ctr,rad,rad,0,360);
             p.close();
-            clipSubjects.push_back(p);
+            clipSubjects.getOutline().push_back(p);
         } else if(clipSubjectType == SQUARES) {
             ofRectangle p;
             float rad = ofRandom(50,120);
@@ -260,7 +258,7 @@ void testApp::genSubjects(ofxSlider<int> & ct) {
             r.addVertex(ofPoint(p.x+p.width,p.y+p.height));
             r.addVertex(ofPoint(p.x,p.y+p.height));
             r.close();
-            clipSubjects.push_back(r);
+            clipSubjects.getOutline().push_back(r);
         } else if(clipSubjectType == RANDOM_POLY) {
         }
     }
@@ -273,7 +271,7 @@ void testApp::genSubjects(ofxSlider<int> & ct) {
             r.addVertex(ctr);
         }
         r.close();
-        clipSubjects.push_back(r);
+        clipSubjects.getOutline().push_back(r);
     }
  
     
@@ -293,7 +291,7 @@ void testApp::genMasks(ofxSlider<int> & ct) {
             ofPoint ctr = screenCtr + ofPoint(ofRandom(-100,100),ofRandom(-100,100)); 
             p.arc(ctr,rad,rad,0,360);
             p.close();
-            clipMasks.push_back(p);
+            clipMasks.getOutline().push_back(p);
         } else if(clipMaskType == SQUARES) {
             ofRectangle p;
             float rad = ofRandom(50,120);
@@ -305,7 +303,7 @@ void testApp::genMasks(ofxSlider<int> & ct) {
             r.addVertex(ofPoint(p.x+p.width,p.y+p.height));
             r.addVertex(ofPoint(p.x,p.y+p.height));
             r.close();
-            clipMasks.push_back(r);
+            clipMasks.getOutline().push_back(r);
         } else if(clipMaskType == RANDOM_POLY) {
         }
     }
@@ -317,7 +315,7 @@ void testApp::genMasks(ofxSlider<int> & ct) {
             r.addVertex(ctr);
         }
         r.close();
-        clipMasks.push_back(r);
+        clipMasks.getOutline().push_back(r);
     }
     
 
@@ -354,15 +352,15 @@ void testApp::joinType(int & ct) {
     switch (ct) {
         case 0:
             currentClipperJoinType = OFX_CLIPPER_JOINTYPE_SQUARE;
-            joinTypeSlider.setName("JOIN TYPE: SQUARE");
+            joinTypeSlider.setName("TYPE: SQUARE");
             break;
         case 1:
             currentClipperJoinType = OFX_CLIPPER_JOINTYPE_ROUND;
-            joinTypeSlider.setName("JOIN TYPE: ROUND");
+            joinTypeSlider.setName("TYPE: ROUND");
             break;
         case 2:
             currentClipperJoinType = OFX_CLIPPER_JOINTYPE_MITER;
-            joinTypeSlider.setName("JOIN TYPE: MITER");
+            joinTypeSlider.setName("TYPE: MITER");
             break;
         default:
             break;
@@ -442,6 +440,7 @@ void testApp::maskPolyType(int & ct) {
         default:
             break;
     }
+    
     genMasks(nClipMasks);
     bNeedsUpdate = true;
 }

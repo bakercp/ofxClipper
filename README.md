@@ -4,7 +4,6 @@ ofxClipper
 ![Screenshot](https://github.com/bakercp/ofxClipper/raw/master/screen.png)
 
 Description
-
 -----------
 
 An [openFrameworks](http://www.openframeworks.cc/) wrapper for [Clipper](http://www.angusj.com/delphi/clipper.php) - "an open source freeware polygon clipping library".
