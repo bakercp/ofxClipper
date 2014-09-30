@@ -1,40 +1,42 @@
-/*==============================================================================
- 
- Copyright (c) 2010, 2011, 2012 Christopher Baker <http://christopherbaker.net>
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- 
- ==============================================================================*/
+// =============================================================================
+//
+// Copyright (c) 2010-2014 Christopher Baker <http://christopherbaker.net>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+// =============================================================================
+
 
 #include "ofxClipper.h"
 
+
 static int clipperGlobalScale = 1000000000;
 
-//--------------------------------------------------------------
+
 ofxClipper::ofxClipper() {}
 
-//--------------------------------------------------------------
+
 ofxClipper::~ofxClipper() {
     // is super called here:
 }
 
-//--------------------------------------------------------------
+
 bool ofxClipper::addPath(ofPath& path, 
                          ofxClipperPolyType clipperType) {
     // clipper wants to know if the path is closed, so i iterate through subpaths (ofPolylines) and tell clipper it is not closed, if a single one of them is open
@@ -53,7 +55,7 @@ bool ofxClipper::addPath(ofPath& path,
     return AddPaths(out,(ClipperLib::PolyType)clipperType, isClosed);
 }
 
-//--------------------------------------------------------------
+
 bool ofxClipper::addPolylines(ofxPolylines& polylines, 
                               ofxClipperPolyType clipperType) {
     // clipper wants to know if the path is closed, so i iterate through the ofPolyline's and tell clipper it is not closed, if a single one of them is open
@@ -72,7 +74,7 @@ bool ofxClipper::addPolylines(ofxPolylines& polylines,
     return AddPaths(out,(ClipperLib::PolyType)clipperType, isClosed);
 }
 
-//--------------------------------------------------------------
+
 bool ofxClipper::addPolyline(ofPolyline& polyline, 
                              ofxClipperPolyType clipperType) {
     // clipper wants to know if the path is closed, so i iterate through the ofPolyline's and tell clipper it is not closed, if a single one of them is open
@@ -85,7 +87,7 @@ bool ofxClipper::addPolyline(ofPolyline& polyline,
     return AddPath(out,(ClipperLib::PolyType)clipperType, polyline.isClosed());
 }
 
-//--------------------------------------------------------------
+
 bool ofxClipper::addRectangle(ofRectangle& rectangle, 
                               ofxClipperPolyType clipperType) {
     
@@ -100,7 +102,7 @@ bool ofxClipper::addRectangle(ofRectangle& rectangle,
     return AddPath(out,(ClipperLib::PolyType)clipperType, true); // we just closed the polyline above, so we send "true"
 }
 
-//--------------------------------------------------------------
+
 bool ofxClipper::clip(ofxClipperClipType clipType, 
                       ofxPolylines &solution,
                       ofPolyWindingMode subFillType,
@@ -115,18 +117,18 @@ bool ofxClipper::clip(ofxClipperClipType clipType,
     return success;
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::clear() {
     ClipperLib::Clipper::Clear();
 }
 
-//--------------------------------------------------------------
-//--------------------------------------------------------------
-//--------------------------------------------------------------
+
+
+
 void ofxClipper::ofPath_to_Polygons(ofPath& path,ClipperLib::Paths& polygons) {
     return ofxPolylines_to_Polygons(path.getOutline(),polygons);
 }
-//--------------------------------------------------------------
+
 ClipperLib::Path ofxClipper::ofPolyline_to_Polygon(ofPolyline& polyline) {
 	vector<ofPoint> verts = polyline.getVertices();
     vector<ofPoint>::iterator iter;
@@ -139,7 +141,7 @@ ClipperLib::Path ofxClipper::ofPolyline_to_Polygon(ofPolyline& polyline) {
     return polygon;
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::ofxPolylines_to_Polygons(ofxPolylines& polylines,ClipperLib::Paths& polygons) {
     vector<ofPolyline>::iterator iter;
     for(iter = polylines.begin(); iter != polylines.end(); iter++) {
@@ -147,7 +149,7 @@ void ofxClipper::ofxPolylines_to_Polygons(ofxPolylines& polylines,ClipperLib::Pa
     }
 }
 
-//--------------------------------------------------------------
+
 ofPolyline ofxClipper::polygon_to_ofPolyline(ClipperLib::Path& polygon) {
     vector<ClipperLib::IntPoint>::iterator iter;
     ofPolyline polyline;
@@ -160,7 +162,7 @@ ofPolyline ofxClipper::polygon_to_ofPolyline(ClipperLib::Path& polygon) {
     return polyline;
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::polygons_to_ofxPolylines(ClipperLib::Paths& polygons,ofxPolylines& polylines) {
     vector<ClipperLib::Path>::iterator iter;
     for(iter = polygons.begin(); iter != polygons.end(); iter++) {
@@ -168,7 +170,7 @@ void ofxClipper::polygons_to_ofxPolylines(ClipperLib::Paths& polygons,ofxPolylin
     }
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::polygons_to_ofPath(ClipperLib::Paths& polygons,ofPath& path) {
     vector<ClipperLib::Path>::iterator iter;
     for(iter = polygons.begin(); iter != polygons.end(); iter++) {
@@ -178,17 +180,17 @@ void ofxClipper::polygons_to_ofPath(ClipperLib::Paths& polygons,ofPath& path) {
 
 
 // utility functions
-//--------------------------------------------------------------
+
 bool ofxClipper::Orientation(ofPolyline &poly) {
     return ClipperLib::Orientation(ofPolyline_to_Polygon(poly));
 }
 
-//--------------------------------------------------------------
+
 double ofxClipper::Area(ofPolyline &poly) {
     return ClipperLib::Area(ofPolyline_to_Polygon(poly));
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::OffsetPolylines(ofxPolylines &in_polys, 
                     ofxPolylines &out_polys,
                     double offset, 
@@ -205,7 +207,7 @@ void ofxClipper::OffsetPolylines(ofxPolylines &in_polys,
     polygons_to_ofxPolylines(out,out_polys);
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::OffsetPath(ofPath &in_path,
                                  ofPath &out_path,
                                  double offset,
@@ -223,7 +225,7 @@ void ofxClipper::OffsetPath(ofPath &in_path,
 }
 
 
-//--------------------------------------------------------------
+
 void ofxClipper::SimplifyPolyline(ofPolyline &in_poly, 
                      ofxPolylines  &out_polys,
                      ofPolyWindingMode windingMode) {
@@ -234,7 +236,7 @@ void ofxClipper::SimplifyPolyline(ofPolyline &in_poly,
     polygons_to_ofxPolylines(out,out_polys);
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::SimplifyPolylines(ofxPolylines &in_polys, 
                       ofxPolylines &out_polys,
                       ofPolyWindingMode windingMode) {
@@ -245,7 +247,7 @@ void ofxClipper::SimplifyPolylines(ofxPolylines &in_polys,
     polygons_to_ofxPolylines(out,out_polys);
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::SimplifyPolylines(ofxPolylines &polys,
                                    ofPolyWindingMode windingMode) {
     ClipperLib::Paths in;
@@ -255,7 +257,7 @@ void ofxClipper::SimplifyPolylines(ofxPolylines &polys,
     polygons_to_ofxPolylines(in,polys);
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::SimplifyPath(ofPath &path,
                               ofxPolylines &out_polys,
                               ofPolyWindingMode windingMode) {
@@ -266,7 +268,7 @@ void ofxClipper::SimplifyPath(ofPath &path,
     polygons_to_ofxPolylines(out,out_polys);
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::ReversePolyline(ofPolyline& poly) {
     ClipperLib::Path in;
     in = ofPolyline_to_Polygon(poly);
@@ -274,7 +276,7 @@ void ofxClipper::ReversePolyline(ofPolyline& poly) {
     poly = polygon_to_ofPolyline(in);
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::ReversePolylines(ofxPolylines& polys) {
     ClipperLib::Paths in;
     ofxPolylines_to_Polygons(polys,in);
@@ -283,7 +285,7 @@ void ofxClipper::ReversePolylines(ofxPolylines& polys) {
     polygons_to_ofxPolylines(in,polys);
 }
 
-//--------------------------------------------------------------
+
 void ofxClipper::ReversePath(ofPath& path, ofxPolylines &out_polys) {
     ClipperLib::Paths in;
     ofPath_to_Polygons(path, in);
@@ -292,7 +294,7 @@ void ofxClipper::ReversePath(ofPath& path, ofxPolylines &out_polys) {
     polygons_to_ofxPolylines(in,out_polys);
 }
 
-//--------------------------------------------------------------
+
 ClipperLib::PolyFillType ofxClipper::convertWindingMode(ofPolyWindingMode windingMode) {
     
     //enum PolyFillType { pftEvenOdd, pftNonZero, pftPositive, pftNegative };
@@ -317,7 +319,7 @@ ClipperLib::PolyFillType ofxClipper::convertWindingMode(ofPolyWindingMode windin
     }
 }
 
-//--------------------------------------------------------
+
 void ofxClipper::setGlobalScale(long long newScale) {
     clipperGlobalScale = newScale;
 }
