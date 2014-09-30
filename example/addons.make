@@ -1,3 +1,2 @@
 ofxClipper
-addons
 ofxGui
