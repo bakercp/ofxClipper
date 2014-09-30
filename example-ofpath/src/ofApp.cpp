@@ -1,8 +1,33 @@
-#include "testApp.h"
+// =============================================================================
+//
+// Copyright (c) 2010-2014 Christopher Baker <http://christopherbaker.net>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+// =============================================================================
 
-//--------------------------------------------------------------
-void testApp::setup(){
 
+#include "ofApp.h"
+
+
+void ofApp::setup()
+{
     ofSetBackgroundColor(0);
     
     bNeedsUpdate = true; // a housekeeping variable to respond to gui changes
@@ -23,15 +48,15 @@ void testApp::setup(){
     clipTypePanel.add(nClipMasks.setup("# clip masks   ",1,1,100));
     clipTypePanel.add(useMouseClipper.setup("Use Mouse Clip Mask", true));
                
-    useMouseClipper.addListener(this,&testApp::mouseClipper);
+    useMouseClipper.addListener(this, &ofApp::mouseClipper);
     
-    clipTypeSlider.addListener(this,&testApp::clipType);
+    clipTypeSlider.addListener(this, &ofApp::clipType);
     
-    maskTypeSlider.addListener(this,&testApp::maskPolyType);
-    subjectTypeSlider.addListener(this,&testApp::subjectPolyType);
+    maskTypeSlider.addListener(this, &ofApp::maskPolyType);
+    subjectTypeSlider.addListener(this, &ofApp::subjectPolyType);
     
-    //    nClipMasks.addListener(this,&testApp::genMasks);              // ! results in poco non viable overload, how to fix?
-    //    nClipSubjects.addListener(this,&testApp::genSubjects);        // ! results in poco non viable overload, how to fix?
+    //    nClipMasks.addListener(this, &ofApp::genMasks);              // ! results in poco non viable overload, how to fix?
+    //    nClipSubjects.addListener(this, &ofApp::genSubjects);        // ! results in poco non viable overload, how to fix?
     
     offsetPanel.setup("offsets","settings.xml", 10, 200);
     offsetPanel.add(enableOffsetsToggle.setup("show offset", true));
@@ -40,14 +65,14 @@ void testApp::setup(){
     offsetPanel.add(endTypeSlider.setup("END TYPE: SQUARE",0,0,3));
     offsetPanel.add(miterLimitSlider.setup("miter limit",2,0,30));
     
-    joinTypeSlider.addListener(this,&testApp::joinType);
-    endTypeSlider.addListener(this,&testApp::endType);
-    miterLimitSlider.addListener(this,&testApp::miterLimit);
-    offsetDeltaSlider.addListener(this,&testApp::offsetDelta);
+    joinTypeSlider.addListener(this, &ofApp::joinType);
+    endTypeSlider.addListener(this, &ofApp::endType);
+    miterLimitSlider.addListener(this, &ofApp::miterLimit);
+    offsetDeltaSlider.addListener(this, &ofApp::offsetDelta);
     
     simplifyPanel.setup("Simplify","settings.xml", ofGetWidth()-100,10);
     simplifyPanel.add(simplifyPath.setup("num vertices",10,3,40));
-    //    simplifyPath.addListener(this,&testApp::genSimplifyPath);     // ! results in poco non viable overload, how to fix?
+    //    simplifyPath.addListener(this, &ofApp::genSimplifyPath);     // ! results in poco non viable overload, how to fix?
     
     genSimplifyPath(simplifyPath);
     bSimplifyPathNeedsUpdate = true;
@@ -59,10 +84,12 @@ void testApp::setup(){
     
 }
 
-//--------------------------------------------------------------
-void testApp::update(){
 
-    if(bNeedsUpdate) {
+void ofApp::update()
+{
+
+    if (bNeedsUpdate)
+    {
         
         // clear out our temporary clipped data
         clips.clear();
@@ -78,12 +105,14 @@ void testApp::update(){
         // execute the clipping operation based on the current clipping type
         clipper.clip(currentClipperType,clips.getOutline());
         
-        if(bSimplifyPathNeedsUpdate) {
+        if (bSimplifyPathNeedsUpdate)
+        {
             ofxClipper::SimplifyPath(complexPath, simplifiedPath.getOutline());
         }
         
         // if we have offsets enabled, generate the offsets
-        if(enableOffsetsToggle) {
+        if (enableOffsetsToggle)
+        {
             offsets.clear();
             ofxClipper::OffsetPath(clips,
                                        offsets,
@@ -100,8 +129,9 @@ void testApp::update(){
 
 }
 
-//--------------------------------------------------------------
-void testApp::draw(){
+
+void ofApp::draw()
+{
 
     ofBackground(0);
 
@@ -173,7 +203,8 @@ void testApp::draw(){
     clips.setFilled(false);
     clips.draw();
 
-    if(enableOffsetsToggle) {
+    if (enableOffsetsToggle)
+    {
         offsets.setStrokeColor(cOffset);
         offsets.setStrokeWidth(1.0);
         offsets.setFilled(false);
@@ -188,10 +219,13 @@ void testApp::draw(){
     ofPushMatrix();
     ofTranslate(ofGetWidth() * 2 / 4, 100);
     complexPath.draw();
-    for(int i = 0; i < simplifiedPath.getOutline().size(); i++) {
+
+    for (std::size_t i = 0; i < simplifiedPath.getOutline().size(); ++i)
+    {
         ofSetColor(255,255,0);
         simplifiedPath.getOutline()[i].draw();
     }
+
     ofPopMatrix();
     
     // draw the gui
@@ -202,13 +236,13 @@ void testApp::draw(){
     
     ofDisableAlphaBlending();
 
-    
-    
 }
 
-//--------------------------------------------------------------
-void testApp::makeMouseClip() {
-    if(mclip) {
+
+void ofApp::makeMouseClip()
+{
+    if (mclip)
+    {
         clipMasks.clear();
         ofPolyline p;
         ofPoint ctr = ofPoint(ofGetMouseX() + ofGetWidth() / 4, ofGetMouseY());
@@ -219,35 +253,44 @@ void testApp::makeMouseClip() {
     }
 }
 
-//--------------------------------------------------------------
-void testApp::mousePressed( int x, int y, int button ) {
-    makeMouseClip();
-}
-//--------------------------------------------------------------
-void testApp::mouseReleased( int x, int y, int button ) {
+
+void ofApp::mousePressed(int x, int y, int button)
+{
     makeMouseClip();
 }
 
-//--------------------------------------------------------------
-void testApp::mouseMoved( int x, int y ) {
+
+void ofApp::mouseReleased(int x, int y, int button)
+{
     makeMouseClip();
 }
 
-//--------------------------------------------------------------
-void testApp::genSubjects(ofxSlider<int> & ct) {
+
+void ofApp::mouseMoved(int x, int y)
+{
+    makeMouseClip();
+}
+
+
+void ofApp::genSubjects(ofxSlider<int>& ct)
+{
     clipSubjects.clear();
     
     ofPoint screenCtr = ofPoint(ofGetWidth()/2, ofGetHeight()/2);
     
-    for(int i = 0; i < ct; i++) {
-        if(clipSubjectType == CIRCLES) {
+    for(int i = 0; i < ct; ++i)
+    {
+        if (clipSubjectType == CIRCLES)
+        {
             ofPolyline p;
             float rad = ofRandom(50,120);
             ofPoint ctr = screenCtr + ofPoint(ofRandom(-100,100),ofRandom(-100,100)); 
             p.arc(ctr,rad,rad,0,360);
             p.close();
             clipSubjects.getOutline().push_back(p);
-        } else if(clipSubjectType == SQUARES) {
+        }
+        else if (clipSubjectType == SQUARES)
+        {
             ofRectangle p;
             float rad = ofRandom(50,120);
             ofPoint ctr = screenCtr + ofPoint(ofRandom(-100,100),ofRandom(-100,100)); 
@@ -259,14 +302,18 @@ void testApp::genSubjects(ofxSlider<int> & ct) {
             r.addVertex(ofPoint(p.x,p.y+p.height));
             r.close();
             clipSubjects.getOutline().push_back(r);
-        } else if(clipSubjectType == RANDOM_POLY) {
+        }
+        else if (clipSubjectType == RANDOM_POLY)
+        {
         }
     }
     
-    if(clipSubjectType == RANDOM_POLY) {
+    if (clipSubjectType == RANDOM_POLY)
+    {
         ofPolyline r;
         
-        for(int i = 0; i < ct; i++) {
+        for (int i = 0; i < ct; ++i)
+        {
             ofPoint ctr = screenCtr + ofPoint(ofRandom(-150,150),ofRandom(-150,150)); 
             r.addVertex(ctr);
         }
@@ -278,21 +325,25 @@ void testApp::genSubjects(ofxSlider<int> & ct) {
     bNeedsUpdate = true;
 }
 
-//--------------------------------------------------------------
-void testApp::genMasks(ofxSlider<int> & ct) {
-    
+
+void ofApp::genMasks(ofxSlider<int>& ct)
+{
     clipMasks.clear();
     ofPoint screenCtr = ofPoint(ofGetWidth()/2, ofGetHeight()/2);
 
-    for(int i = 0; i < ct; i++) {
-        if(clipMaskType == CIRCLES) {
+    for (int i = 0; i < ct; ++i)
+    {
+        if (clipMaskType == CIRCLES)
+        {
             ofPolyline p;
             float rad = ofRandom(50,120);
             ofPoint ctr = screenCtr + ofPoint(ofRandom(-100,100),ofRandom(-100,100)); 
             p.arc(ctr,rad,rad,0,360);
             p.close();
             clipMasks.getOutline().push_back(p);
-        } else if(clipMaskType == SQUARES) {
+        }
+        else if (clipMaskType == SQUARES)
+        {
             ofRectangle p;
             float rad = ofRandom(50,120);
             ofPoint ctr = screenCtr + ofPoint(ofRandom(-100,100),ofRandom(-100,100)); 
@@ -304,13 +355,17 @@ void testApp::genMasks(ofxSlider<int> & ct) {
             r.addVertex(ofPoint(p.x,p.y+p.height));
             r.close();
             clipMasks.getOutline().push_back(r);
-        } else if(clipMaskType == RANDOM_POLY) {
+        }
+        else if (clipMaskType == RANDOM_POLY)
+        {
         }
     }
 
-    if(clipMaskType == RANDOM_POLY) {
+    if (clipMaskType == RANDOM_POLY)
+    {
         ofPolyline r;
-        for(int i = 0; i < ct; i++) {
+        for (int i = 0; i < ct; ++i)
+        {
             ofPoint ctr = screenCtr + ofPoint(ofRandom(-150,150),ofRandom(-150,150)); 
             r.addVertex(ctr);
         }
@@ -322,9 +377,11 @@ void testApp::genMasks(ofxSlider<int> & ct) {
     bNeedsUpdate = true;
 }
 
-//--------------------------------------------------------------
-void testApp::clipType(int & ct) {
-    switch (ct) {
+
+void ofApp::clipType(int& ct)
+{
+    switch (ct)
+    {
         case 0:
             currentClipperType = OFX_CLIPPER_INTERSECTION;
             clipTypeSlider.setName("TYPE: INTERSECTION");
@@ -344,12 +401,15 @@ void testApp::clipType(int & ct) {
         default:
             break;
     }
+
     bNeedsUpdate = true;
 }
 
-//--------------------------------------------------------------
-void testApp::joinType(int & ct) {
-    switch (ct) {
+
+void ofApp::joinType(int& ct)
+{
+    switch (ct)
+    {
         case 0:
             currentClipperJoinType = OFX_CLIPPER_JOINTYPE_SQUARE;
             joinTypeSlider.setName("TYPE: SQUARE");
@@ -368,9 +428,11 @@ void testApp::joinType(int & ct) {
     bNeedsUpdate = true;
 }
 
-//--------------------------------------------------------------
-void testApp::endType(int & ct) {
-    switch (ct) {
+
+void ofApp::endType(int& ct)
+{
+    switch (ct)
+    {
         case 0:
             currentClipperEndType = OFX_CLIPPER_ENDTYPE_SQUARE;
             endTypeSlider.setName("END TYPE: SQUARE");
@@ -390,18 +452,22 @@ void testApp::endType(int & ct) {
         default:
             break;
     }
-    bNeedsUpdate = true;
-}
 
-//--------------------------------------------------------------
-void testApp::miterLimit(float & f) {
     bNeedsUpdate = true;
 }
 
 
-//--------------------------------------------------------------
-void testApp::subjectPolyType(int & ct) {
-    switch (ct) {
+void ofApp::miterLimit(float& f)
+{
+    bNeedsUpdate = true;
+}
+
+
+
+void ofApp::subjectPolyType(int& ct)
+{
+    switch (ct)
+    {
         case 0:
             clipSubjectType = CIRCLES;
             subjectTypeSlider.setName("SUBJ. POLYS: CIRCLE");
@@ -422,8 +488,9 @@ void testApp::subjectPolyType(int & ct) {
     bNeedsUpdate = true;
 }
 
-//--------------------------------------------------------------
-void testApp::maskPolyType(int & ct) {
+
+void ofApp::maskPolyType(int& ct)
+{
     switch (ct) {
         case 0:
             clipMaskType = CIRCLES;
@@ -445,28 +512,34 @@ void testApp::maskPolyType(int & ct) {
     bNeedsUpdate = true;
 }
 
-//--------------------------------------------------------------
-void testApp::offsetDelta(float & f) {
+
+void ofApp::offsetDelta(float& f)
+{
     bNeedsUpdate = true;
 }
 
-//--------------------------------------------------------------
-void testApp::mouseClipper(bool & b) {
+
+void ofApp::mouseClipper(bool& b)
+{
 
     mclip = b;
     
-    if(!mclip) {
+    if (!mclip)
+    {
         genMasks(nClipMasks);
     }
     
     bNeedsUpdate = true;
 }
 
-//--------------------------------------------------------------
-void testApp::genSimplifyPath(ofxSlider<int> &ct) {
 
+void ofApp::genSimplifyPath(ofxSlider<int> &ct)
+{
     complexPath.clear();
-    for(int i = 0; i < ct; i++) complexPath.lineTo(ofPoint(ofRandom(-80,80),ofRandom(-80,80)));
+    for (int i = 0; i < ct; ++i)
+    {
+        complexPath.lineTo(ofPoint(ofRandom(-80,80),ofRandom(-80,80)));
+    }
     complexPath.close();
         
     bSimplifyPathNeedsUpdate = true;

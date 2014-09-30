@@ -1,0 +1,2 @@
+ofxClipper
+ofxGui
