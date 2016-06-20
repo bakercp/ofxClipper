@@ -129,7 +129,7 @@ void ofxClipper::ofPath_to_Polygons(ofPath& path,ClipperLib::Paths& polygons) {
     return ofxPolylines_to_Polygons(path.getOutline(),polygons);
 }
 
-ClipperLib::Path ofxClipper::ofPolyline_to_Polygon(ofPolyline& polyline) {
+ClipperLib::Path ofxClipper::ofPolyline_to_Polygon(const ofPolyline& polyline) {
 	vector<ofPoint> verts = polyline.getVertices();
     vector<ofPoint>::iterator iter;
     ClipperLib::Path polygon;
@@ -142,8 +142,8 @@ ClipperLib::Path ofxClipper::ofPolyline_to_Polygon(ofPolyline& polyline) {
 }
 
 
-void ofxClipper::ofxPolylines_to_Polygons(ofxPolylines& polylines,ClipperLib::Paths& polygons) {
-    vector<ofPolyline>::iterator iter;
+void ofxClipper::ofxPolylines_to_Polygons(const ofxPolylines& polylines,ClipperLib::Paths& polygons) {
+    vector<ofPolyline>::const_iterator iter;
     for(iter = polylines.begin(); iter != polylines.end(); iter++) {
         polygons.push_back(ofPolyline_to_Polygon((*iter)));
     }
@@ -172,10 +172,37 @@ void ofxClipper::polygons_to_ofxPolylines(ClipperLib::Paths& polygons,ofxPolylin
 
 
 void ofxClipper::polygons_to_ofPath(ClipperLib::Paths& polygons,ofPath& path) {
+    
+    ofPath::Mode currentMode = path.getMode();
+    path.setMode(ofPath::POLYLINES);
+    
     vector<ClipperLib::Path>::iterator iter;
     for(iter = polygons.begin(); iter != polygons.end(); iter++) {
-        path.getOutline().push_back(polygon_to_ofPolyline((*iter)));
+        path.append(polygon_to_ofPath((*iter)));
     }
+    
+    path.setMode(currentMode);
+}
+
+ofPath ofxClipper::polygon_to_ofPath(ClipperLib::Path& polygon) {
+    vector<ClipperLib::IntPoint>::iterator iter;
+    ofPath path;
+    for(iter = polygon.begin(); iter != polygon.end(); iter++) {
+        
+        ofPoint pnt((*iter).X / double(clipperGlobalScale),  // bring back to our coords
+                    (*iter).Y / double(clipperGlobalScale)); // bring back to our coords
+        
+        if(iter == polygon.begin())
+        {
+            path.moveTo(pnt);
+        }
+        else
+        {
+            path.lineTo(pnt);
+        }
+    }
+    path.close(); // close it
+    return path;
 }
 
 
