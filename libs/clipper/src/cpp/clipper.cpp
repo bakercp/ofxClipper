@@ -1403,7 +1403,7 @@ void ClipperBase::PopLocalMinima()
 }
 //------------------------------------------------------------------------------
 
-IntRect ClipperBase::GetBounds()
+IntRect ClipperBase::GetBounds() const
 {
   IntRect result;
   LocalMinima* lm = m_MinimaList;

@@ -1,6 +1,6 @@
 // =============================================================================
 //
-// Copyright (c) 2010-2014 Christopher Baker <http://christopherbaker.net>
+// Copyright (c) 2010-2016 Christopher Baker <http://christopherbaker.net>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,6 @@
 
 int main()
 {
-	ofSetupOpenGL(1024, 768, OF_WINDOW);
-	ofRunApp(new ofApp());
+    ofSetupOpenGL(1024, 768, OF_WINDOW);
+    return ofRunApp(std::make_shared<ofApp>());
 }

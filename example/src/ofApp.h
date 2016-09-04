@@ -31,45 +31,44 @@
 #include "ofxClipper.h"
 
 
-enum TestPolyType
-{
-    CIRCLES,
-    SQUARES,
-    RANDOM_POLY,
-};
-
-
 class ofApp: public ofBaseApp
 {
 public:
+    enum TestPolyType
+    {
+        CIRCLES,
+        SQUARES,
+        RANDOM_POLY,
+    };
+
     void setup();
     void update();
     void draw();
 
     void mouseMoved(int x, int y);
-    void mousePressed(int x, int y, int button);
-    void mouseReleased(int x, int y, int button);
 
-    ofxClipper clipper;
+    ofx::Clipper clipper;
     bool bNeedsUpdate;
 
-    ofxClipperClipType currentClipperType;
-    ofxClipperJoinType currentClipperJoinType;
-    ofxClipperEndType currentClipperEndType;
-    
+    ClipperLib::ClipType currentClipperType;
+    ClipperLib::JoinType currentClipperJoinType;
+    ClipperLib::EndType currentClipperEndType;
+
     TestPolyType clipSubjectType;
-    ofxPolylines clipSubjects;
+    std::vector<ofPolyline> clipSubjects;
 
     TestPolyType clipMaskType;
-    ofxPolylines clipMasks;
+    std::vector<ofPolyline> clipMasks;
     
-    ofxPolylines clips;
-    ofxPolylines offsets;
+    std::vector<ofPolyline> clips;
+    std::vector<ofPolyline> offsets;
+
+    ofRectangle boundingBox;
 
     // minimal gui
 
     ofPath complexPath;
-    ofxPolylines simplifiedPath;
+    std::vector<ofPolyline> simplifiedPath;
     
     ofxPanel clipTypePanel;
     ofxIntSlider clipTypeSlider;
