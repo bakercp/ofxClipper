@@ -35,8 +35,40 @@ The addon should sit in `openFrameworks/addons/ofxClipper/`.
 
 ofxClipper has been tested with the latest development version of openFrameworks.
 
+Example
+-------
+```cpp
+void ofApp::draw() {
+    ofTranslate(ofGetWidth() / 2, ofGetHeight() / 2);
 
-#License
+    // Create two partially overlapping rotating pentagons
+    ofPolyline pa, pb;
+    for(int i = 0; i < 5; i++) {
+        float a = i * static_cast<float>(TWO_PI) / 5 + ofGetElapsedTimef();
+        pa.addVertex(300 * cos(a) - 80, 300 * sin(a));
+        pb.addVertex(300 * cos(-a) + 80, 300 * sin(-a));
+    }
+    pa.close();
+    pb.close();
+
+    // Create and populate clipper
+    ofx::Clipper clipper;
+    clipper.addPolyline(pa, ClipperLib::ptSubject);
+    clipper.addPolyline(pb, ClipperLib::ptClip);
+
+    // Calculate intersection between the two pentagons
+    auto intersection = clipper.getClipped(ClipperLib::ClipType::ctIntersection);
+    
+    // Draw result
+    for(auto & line : intersection) {
+        line.draw();
+    }
+}
+```
+Note: this minimal example tries to be short, not fast. Avoid creating instances of `ofPolyline` and `ofx::Clipper` inside `draw()`.
+
+License
+-------
 
 The Clipper license file can be found in the `libs/clipper` folder above.
 
