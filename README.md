@@ -37,6 +37,13 @@ ofEndShape();
 
 [http://www.openframeworks.cc/](http://www.openframeworks.cc/)
 
+#### Open paths
+If you want to do clipping operations on open paths, this can be done, by adding the `use_lines` preprocessor macro to your build.
+
+See [issue #17](https://github.com/bakercp/ofxClipper/issues/17)
+
+Add macro to Xcode: [Stackoverflow](https://stackoverflow.com/a/26928784/10463810)
+
 Installation
 ------------
 
