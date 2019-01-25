@@ -43,7 +43,13 @@ bool ofxClipper::addPath(ofPath& path,
     bool isClosed = true;
     for (ofPolyline poly : path.getOutline()) {
         isClosed = poly.isClosed() == true ? isClosed : false;
+#ifdef use_lines
+        // If use_lines is defined, we only fix closed paths on the clipping mask.
+        // The use_lines macro lets us do clipping operations on open paths.
+        if(!isClosed && clipperType != OFX_CLIPPER_SUBJECT){
+#else
         if(!isClosed){
+#endif
             poly.close();
             isClosed = true;
             ofLog(OF_LOG_NOTICE, "path not closed, so we closed it for you in ofxClipper.cpp::addPath(...)");
@@ -62,7 +68,13 @@ bool ofxClipper::addPolylines(ofxPolylines& polylines,
     bool isClosed = true;
     for (ofPolyline poly : polylines) {
         isClosed = poly.isClosed() == true ? isClosed : false;
+#ifdef use_lines
+        // If use_lines is defined, we only fix closed paths on the clipping mask.
+        // The use_lines macro lets us do clipping operations on open paths.
+        if(!isClosed && clipperType != OFX_CLIPPER_SUBJECT){
+#else
         if(!isClosed){
+#endif
             poly.close();
             isClosed = true;
             ofLog(OF_LOG_NOTICE, "polyline not closed, so we closed it for you in ofxClipper.cpp::addPolylines(...)");
@@ -78,7 +90,13 @@ bool ofxClipper::addPolylines(ofxPolylines& polylines,
 bool ofxClipper::addPolyline(ofPolyline& polyline, 
                              ofxClipperPolyType clipperType) {
     // clipper wants to know if the path is closed, so i iterate through the ofPolyline's and tell clipper it is not closed, if a single one of them is open
+#ifdef use_lines
+    // If use_lines is defined, we only fix closed paths on the clipping mask.
+    // The use_lines macro lets us do clipping operations on open paths.
+    if(!polyline.isClosed() && clipperType != OFX_CLIPPER_SUBJECT){
+#else
     if(!polyline.isClosed()){
+#endif
         polyline.close();
         ofLog(OF_LOG_NOTICE, "polyline not closed, so we closed it for you in ofxClipper.cpp::addPolyline(...)");
     }
@@ -108,7 +126,11 @@ bool ofxClipper::clip(ofxClipperClipType clipType,
                       ofPolyWindingMode subFillType,
                       ofPolyWindingMode clipFillType) {
     m_UseFullRange = true; // need this for our conversions
+#ifdef use_lines
+    ClipperLib::PolyTree out;
+#else
     ClipperLib::Paths out;
+#endif
     bool success = Execute((ClipperLib::ClipType)clipType,
                             out,
                             convertWindingMode(subFillType),
@@ -125,13 +147,13 @@ void ofxClipper::clear() {
 
 
 
-void ofxClipper::ofPath_to_Polygons(ofPath& path,ClipperLib::Paths& polygons) {
+void ofxClipper::ofPath_to_Polygons(const ofPath& path,ClipperLib::Paths& polygons) {
     return ofxPolylines_to_Polygons(path.getOutline(),polygons);
 }
 
-ClipperLib::Path ofxClipper::ofPolyline_to_Polygon(ofPolyline& polyline) {
-	vector<ofPoint> verts = polyline.getVertices();
-    vector<ofPoint>::iterator iter;
+ClipperLib::Path ofxClipper::ofPolyline_to_Polygon(const ofPolyline& polyline) {
+    vector<glm::tvec3<float, glm::packed_highp>> verts = polyline.getVertices();
+    vector<glm::tvec3<float, glm::packed_highp>>::iterator iter;
     ClipperLib::Path polygon;
     for(iter = verts.begin(); iter != verts.end(); iter++) {
         ClipperLib::IntPoint ip((*iter).x * clipperGlobalScale, 
@@ -142,8 +164,8 @@ ClipperLib::Path ofxClipper::ofPolyline_to_Polygon(ofPolyline& polyline) {
 }
 
 
-void ofxClipper::ofxPolylines_to_Polygons(ofxPolylines& polylines,ClipperLib::Paths& polygons) {
-    vector<ofPolyline>::iterator iter;
+void ofxClipper::ofxPolylines_to_Polygons(const ofxPolylines& polylines,ClipperLib::Paths& polygons) {
+    vector<ofPolyline>::const_iterator iter;
     for(iter = polylines.begin(); iter != polylines.end(); iter++) {
         polygons.push_back(ofPolyline_to_Polygon((*iter)));
     }
@@ -169,14 +191,44 @@ void ofxClipper::polygons_to_ofxPolylines(ClipperLib::Paths& polygons,ofxPolylin
         polylines.push_back(polygon_to_ofPolyline((*iter)));
     }
 }
+    
+
+void ofxClipper::polygons_to_ofxPolylines(ClipperLib::PolyTree& polygons,ofxPolylines& polylines) {
+    ClipperLib::PolyNode* node = polygons.GetFirst();
+    while (node) {
+        polylines.push_back(polygon_to_ofPolyline(node->Contour));
+        node = node->GetNext();
+    }
+}
 
 
 void ofxClipper::polygons_to_ofPath(ClipperLib::Paths& polygons,ofPath& path) {
+    ofPath::Mode currentMode = path.getMode();
+    path.setMode(ofPath::POLYLINES);
     vector<ClipperLib::Path>::iterator iter;
     for(iter = polygons.begin(); iter != polygons.end(); iter++) {
-        path.getOutline().push_back(polygon_to_ofPolyline((*iter)));
+        path.append(polygon_to_ofPath((*iter)));
     }
+    path.setMode(currentMode);
 }
+    
+ofPath ofxClipper::polygon_to_ofPath(ClipperLib::Path& polygon) {
+    vector<ClipperLib::IntPoint>::iterator iter;
+    ofPath path;
+    for(iter = polygon.begin(); iter != polygon.end(); iter++) {
+        ofPoint pnt((*iter).X / double(clipperGlobalScale),  // bring back to our coords
+                    (*iter).Y / double(clipperGlobalScale)); // bring back to our coords
+        
+        if(iter == polygon.begin()) {
+            path.moveTo(pnt);
+        } else {
+            path.lineTo(pnt);
+        }
+    }
+    path.close(); // close it
+    return path;
+}
+
 
 
 // utility functions
