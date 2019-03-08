@@ -45,6 +45,11 @@ public:
     ~Clipper();
 
     std::vector<ofPolyline> getClipped(ClipperLib::ClipType clipType,
+                                       ClipperLib::PolyFillType subFillType = ClipperLib::pftEvenOdd,
+                                       ClipperLib::PolyFillType clipFillType = ClipperLib::pftEvenOdd,
+                                       ClipperLib::cInt scale = DEFAULT_CLIPPER_SCALE);
+    
+    std::vector<ofPolyline> getClipped(ClipperLib::ClipType clipType,
                                        ofPolyWindingMode subFillType = OF_POLY_WINDING_ODD,
                                        ofPolyWindingMode clipFillType = OF_POLY_WINDING_ODD,
                                        ClipperLib::cInt scale = DEFAULT_CLIPPER_SCALE);
@@ -111,6 +116,10 @@ public:
     static std::string toString(ClipperLib::InitOptions initOption);
     static std::string toString(ClipperLib::JoinType joinType);
     static std::string toString(ClipperLib::EndType endType);
+
+    static ofPolyWindingMode next(ofPolyWindingMode s);
+    static ClipperLib::PolyFillType next(ClipperLib::PolyFillType s);
+    static ClipperLib::ClipType next(ClipperLib::ClipType s);
     
     static ofPolyWindingMode toOf(ClipperLib::PolyFillType polyfillType);
     static ClipperLib::PolyFillType toClipper(ofPolyWindingMode windingMode);
@@ -135,6 +144,18 @@ public:
                                               double arcTolerance = DEFAULT_ARC_TOLERANCE,
                                               ClipperLib::cInt scale = DEFAULT_CLIPPER_SCALE);
 
+    static ofPolyline reversPolyline(const ofPolyline& polyline,
+                                     ClipperLib::cInt scale = DEFAULT_CLIPPER_SCALE);
+    
+    static std::vector<ofPolyline> reversePolylines(const std::vector<ofPolyline>& polylines,
+                                                    ClipperLib::cInt scale = DEFAULT_CLIPPER_SCALE);
+    
+//    void ReversePath(Path& p);
+//    void ReversePaths(Paths& p);
+
+    
+    
+    
     //    // Static Utility Functions
 //    ////////////////////////////////////////////////
 //    static bool Orientation(const ofPolyline& poly);

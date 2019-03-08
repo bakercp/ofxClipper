@@ -268,6 +268,7 @@ public:
   void StrictlySimple(bool value) {m_StrictSimple = value;};
   //set the callback function for z value filling on intersections (otherwise Z is 0)
 #ifdef use_xyz
+    s
   void ZFillFunction(TZFillCallback zFillFunc);
 #endif
 protected:

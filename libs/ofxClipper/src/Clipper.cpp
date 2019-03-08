@@ -49,27 +49,27 @@ ofRectangle Clipper::getBounds(ClipperLib::cInt scale) const
     return toOf(GetBounds(), scale);
 }
 
-
+    
 std::vector<ofPolyline> Clipper::getClipped(ClipperLib::ClipType clipType,
-                                            ofPolyWindingMode subFillType,
-                                            ofPolyWindingMode clipFillType,
+                                            ClipperLib::PolyFillType subFillType,
+                                            ClipperLib::PolyFillType clipFillType,
                                             ClipperLib::cInt scale)
 {
     std::vector<ofPolyline> results;
-
+    
     bool success = false;
-
+    
     try
     {
         ClipperLib::Paths out;
-
+        
         bool success = Execute(clipType,
                                out,
-                               toClipper(subFillType),
-                               toClipper(clipFillType));
-
+                               subFillType,
+                               clipFillType);
+        
         results = toOf(out, true, scale);
-
+        
         if (!success)
         {
             ofLogError("Clipper::getClipped") << "Failed to create clipped paths.";
@@ -79,8 +79,17 @@ std::vector<ofPolyline> Clipper::getClipped(ClipperLib::ClipType clipType,
     {
         ofLogError("Clipper::getClipped") << exc.what();
     }
-
+    
     return results;
+}
+
+
+std::vector<ofPolyline> Clipper::getClipped(ClipperLib::ClipType clipType,
+                                            ofPolyWindingMode subFillType,
+                                            ofPolyWindingMode clipFillType,
+                                            ClipperLib::cInt scale)
+{
+    return getClipped(clipType, toClipper(subFillType), toClipper(clipFillType), scale);
 }
 
 
@@ -327,6 +336,49 @@ std::string Clipper::toString(ClipperLib::EndType endType)
 }
 
 
+ofPolyWindingMode Clipper::next(ofPolyWindingMode s)
+{
+    switch (s)
+    {
+        case OF_POLY_WINDING_ODD: return OF_POLY_WINDING_NONZERO;
+        case OF_POLY_WINDING_NONZERO: return OF_POLY_WINDING_POSITIVE;
+        case OF_POLY_WINDING_POSITIVE: return OF_POLY_WINDING_NEGATIVE;
+        case OF_POLY_WINDING_NEGATIVE: return OF_POLY_WINDING_ABS_GEQ_TWO;
+        case OF_POLY_WINDING_ABS_GEQ_TWO: return OF_POLY_WINDING_ODD;
+    }
+    
+    return OF_POLY_WINDING_NONZERO;
+}
+
+
+ClipperLib::PolyFillType Clipper::next(ClipperLib::PolyFillType s)
+{
+    switch (s)
+    {
+        case ClipperLib::pftEvenOdd: return ClipperLib::pftNonZero;
+        case ClipperLib::pftNonZero: return ClipperLib::pftPositive;
+        case ClipperLib::pftPositive: return ClipperLib::pftNegative;
+        case ClipperLib::pftNegative: return ClipperLib::pftEvenOdd;
+    }
+    
+    return ClipperLib::pftEvenOdd;
+}
+
+
+ClipperLib::ClipType Clipper::next(ClipperLib::ClipType s)
+{
+    switch (s)
+    {
+        case ClipperLib::ctIntersection: return ClipperLib::ctUnion;
+        case ClipperLib::ctUnion: return ClipperLib::ctDifference;
+        case ClipperLib::ctDifference: return ClipperLib::ctXor;
+        case ClipperLib::ctXor: return ClipperLib::ctIntersection;
+    }
+    
+    return ClipperLib::ctIntersection;
+}
+
+    
 ofPolyWindingMode Clipper::toOf(ClipperLib::PolyFillType polyfillType)
 {
     switch (polyfillType)
@@ -340,7 +392,6 @@ ofPolyWindingMode Clipper::toOf(ClipperLib::PolyFillType polyfillType)
 
     return OF_POLY_WINDING_ODD;
 }
-
 
 
 ClipperLib::PolyFillType Clipper::toClipper(ofPolyWindingMode windingMode)
@@ -418,4 +469,40 @@ std::vector<ofPolyline> Clipper::getOffsets(const std::vector<ofPolyline>& polyl
 }
 
 
+    
+    
+ofPolyline Clipper::reversPolyline(const ofPolyline& polyline,
+                                   ClipperLib::cInt scale)
+{
+    ClipperLib::Path p = toClipper(polyline, scale);
+    ClipperLib::ReversePath(p);
+    return toOf(p, true, scale);
+}
+    
+    
+std::vector<ofPolyline> Clipper::reversePolylines(const std::vector<ofPolyline>& polylines,
+                                                 ClipperLib::cInt scale)
+{
+    ClipperLib::Paths p = toClipper(polylines, scale);
+    ClipperLib::ReversePaths(p);
+    return toOf(p, true, scale);
+}
+    
+    //    void ReversePath(Path& p);
+    //    void ReversePaths(Paths& p);
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 } // namespace ofx
