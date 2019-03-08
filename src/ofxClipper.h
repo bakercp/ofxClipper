@@ -118,13 +118,14 @@ public:
 //protected:
     // conversion functions
     static void ofPath_to_Polygons(ofPath& path, ClipperLib::Paths& polygons);
-    static ClipperLib::Path ofPolyline_to_Polygon(ofPolyline& polyline);
-    static void ofxPolylines_to_Polygons(ofxPolylines& polylines, ClipperLib::Paths& polygons);
+    static ClipperLib::Path ofPolyline_to_Polygon(const ofPolyline& polyline);
+    static void ofxPolylines_to_Polygons(const ofxPolylines& polylines, ClipperLib::Paths& polygons);
                 
                                       
     static ofPolyline polygon_to_ofPolyline(ClipperLib::Path& polygon);
     static void polygons_to_ofxPolylines(ClipperLib::Paths& polygons, ofxPolylines& polylines);
     static void polygons_to_ofPath(ClipperLib::Paths& polygons, ofPath& path);
+    static ofPath polygon_to_ofPath(ClipperLib::Path& polygon);
 
     static ClipperLib::PolyFillType convertWindingMode(ofPolyWindingMode windingMode);
 
