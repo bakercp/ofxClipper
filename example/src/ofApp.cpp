@@ -1,26 +1,8 @@
-// =============================================================================
 //
-// Copyright (c) 2010-2014 Christopher Baker <http://christopherbaker.net>
+// Copyright (c) 2010 Christopher Baker <https://christopherbaker.net>
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+// SPDX-License-Identifier:    MIT
 //
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-// =============================================================================
 
 
 #include "ofApp.h"
@@ -28,17 +10,16 @@
 
 void ofApp::setup()
 {
-
     ofSetBackgroundColor(0);
     
     bNeedsUpdate = true; // a housekeeping variable to respond to gui changes
-    
-    currentClipperType     = OFX_CLIPPER_INTERSECTION;      // the clip type
-    currentClipperJoinType = OFX_CLIPPER_JOINTYPE_SQUARE;   // for offsets, the joint type
-    currentClipperEndType = OFX_CLIPPER_ENDTYPE_SQUARE;   // for offsets, the joint type
+
+    currentClipperType = ClipperLib::ctIntersection; // the clip type
+    currentClipperJoinType = ClipperLib::jtSquare; // for offsets, the joint type
+    currentClipperEndType = ClipperLib::etClosedPolygon;  // for offsets, the joint type
     
     clipSubjectType = CIRCLES;  // what kind of test subjects to create
-    clipMaskType    = CIRCLES;  // what kind of test clip masks to create
+    clipMaskType = CIRCLES;  // what kind of test clip masks to create
 
     // gui setup
     clipTypePanel.setup("clipper","settings.xml", 10, 10);
@@ -49,15 +30,12 @@ void ofApp::setup()
     clipTypePanel.add(nClipMasks.setup("# clip masks   ",1,1,100));
     clipTypePanel.add(useMouseClipper.setup("Use Mouse Clip Mask", true));
                
-    useMouseClipper.addListener(this,&ofApp::mouseClipper);
+    useMouseClipper.addListener(this, &ofApp::mouseClipper);
     
-    clipTypeSlider.addListener(this,&ofApp::clipType);
+    clipTypeSlider.addListener(this, &ofApp::clipType);
     
-    maskTypeSlider.addListener(this,&ofApp::maskPolyType);
-    subjectTypeSlider.addListener(this,&ofApp::subjectPolyType);
-    
-//    nClipMasks.addListener(this,&ofApp::genMasks);              // ! results in poco non viable overload, how to fix?
-//    nClipSubjects.addListener(this,&ofApp::genSubjects);        // ! results in poco non viable overload, how to fix?
+    maskTypeSlider.addListener(this, &ofApp::maskPolyType);
+    subjectTypeSlider.addListener(this, &ofApp::subjectPolyType);
     
     offsetPanel.setup("offsets","settings.xml", 10, 200);
     offsetPanel.add(enableOffsetsToggle.setup("show offset", true));
@@ -66,19 +44,17 @@ void ofApp::setup()
     offsetPanel.add(endTypeSlider.setup("END TYPE: SQUARE",0,0,3));
     offsetPanel.add(miterLimitSlider.setup("miter limit",2,0,30));
     
-    joinTypeSlider.addListener(this,&ofApp::joinType);
-    endTypeSlider.addListener(this,&ofApp::endType);
-    miterLimitSlider.addListener(this,&ofApp::miterLimit);
-    offsetDeltaSlider.addListener(this,&ofApp::offsetDelta);
+    joinTypeSlider.addListener(this, &ofApp::joinType);
+    endTypeSlider.addListener(this, &ofApp::endType);
+    miterLimitSlider.addListener(this, &ofApp::miterLimit);
+    offsetDeltaSlider.addListener(this, &ofApp::offsetDelta);
 
     simplifyPanel.setup("Simplify","settings.xml", ofGetWidth()-100,10);
     simplifyPanel.add(simplifyPath.setup("num vertices",10,3,40));
-//    simplifyPath.addListener(this,&ofApp::genSimplifyPath);     // ! results in poco non viable overload, how to fix?
-    
+
     genSimplifyPath(simplifyPath);
     bSimplifyPathNeedsUpdate = true;
 
-    
     // generate some initial data
     genSubjects(nClipSubjects);
     genMasks(nClipMasks);
@@ -89,40 +65,46 @@ void ofApp::setup()
 
 void ofApp::update()
 {
-
     if (bNeedsUpdate)
     {
-        // clear out our temporary clipped data
+        // Clear out our temporary clipped data.
         clips.clear();
         
-        // clear the clipper's internal polys
-        clipper.clear();
-        // add the clipper subjects (i.e. the things that will be clipped)
-        clipper.addPolylines(clipSubjects,OFX_CLIPPER_SUBJECT);
-        
-        // add the clipper masks (i.e. the things that will do the clipping)
-        clipper.addPolylines(clipMasks,OFX_CLIPPER_CLIP);
+        // Clear the clipper's internal polys.
+        clipper.Clear();
 
-        // execute the clipping operation based on the current clipping type
-        clipper.clip(currentClipperType,clips);
+        // Add the clipper subjects (i.e. the things that will be clipped).
+        clipper.addPolylines(clipSubjects, ClipperLib::ptSubject);
         
+        // add the clipper masks (i.e. the things that will do the clipping).
+        clipper.addPolylines(clipMasks, ClipperLib::ptClip);
+
+        // Get the bounding box.
+        boundingBox = clipper.getBounds();
+
+        // Gxecute the clipping operation based on the current clipping type.
+        clips = clipper.getClipped(currentClipperType);
+
+        std::cout << clips.size() << std::endl;
+
         if (bSimplifyPathNeedsUpdate)
         {
-            ofxClipper::SimplifyPath(complexPath, simplifiedPath);
+            simplifiedPath = ofx::Clipper::simplifyPath(complexPath);
         }
         
-        // if we have offsets enabled, generate the offsets
+        // If we have offsets enabled, generate the offsets.
         if (enableOffsetsToggle)
         {
-            offsets.clear();
-            ofxClipper::OffsetPolylines(clips, 
-                                       offsets, 
-                                       offsetDeltaSlider,
-                                       currentClipperJoinType,
-                                       currentClipperEndType,
-                                       miterLimitSlider);
+            offsets = ofx::Clipper::getOffsets(clips,
+                                               offsetDeltaSlider,
+                                               currentClipperJoinType,
+                                               currentClipperEndType,
+                                               miterLimitSlider);
         }
-        
+        else
+        {
+            offsets.clear();
+        }
         
         bNeedsUpdate = false;
     }
@@ -133,49 +115,43 @@ void ofApp::update()
 
 void ofApp::draw()
 {
-
-    ofBackground(0);
-
-    ofEnableAlphaBlending();
-
-    // make a little legend for the color
-    ////////////////////////////////////////////////
+    // Make a little legend for the color.
     int y = ofGetHeight() - 60;
     int x = 10;
     int h = 12;
     int w = 30;
     
-    ofColor cSubject(255,0,0,200);
-    ofColor cMask(255,255,0,200);
-    ofColor cResult(0,255,0,200);
-    ofColor cOffset(0,0,255,200);
+    ofColor cSubject(255, 0, 0, 200);
+    ofColor cMask(255, 255, 0, 200);
+    ofColor cResult(0, 255, 0, 200);
+    ofColor cOffset(0, 0, 255, 200);
     
     ofFill();
     ofSetColor(cSubject);
-    ofRect(x,y-h+2,w,h);
+    ofDrawRectangle(x, y - h + 2, w, h);
     ofSetColor(255);
-    ofDrawBitmapString("Polygon Clip Subjects", ofVec3f(x + w + 2,y));
+    ofDrawBitmapString("Polygon Clip Subjects", glm::vec3(x + w + 2, y, 0));
     
     y+= 16;
     ofFill();
     ofSetColor(cMask);
-    ofRect(x,y-h+2,w,h);
+    ofDrawRectangle(x, y - h + 2, w, h);
     ofSetColor(255);
-    ofDrawBitmapString("Polygon Clip Masks", ofVec3f(x + w + 2,y));
+    ofDrawBitmapString("Polygon Clip Masks", glm::vec3(x + w + 2, y, 0));
 
     y+= 16;
     ofFill();
     ofSetColor(cResult);
-    ofRect(x,y-h+2,w,h);
+    ofDrawRectangle(x, y - h + 2, w, h);
     ofSetColor(255);
-    ofDrawBitmapString("Clip Results", ofVec3f(x + w + 2,y));
+    ofDrawBitmapString("Clip Results", glm::vec3(x + w + 2, y, 0));
 
     y+= 16;
     ofFill();
     ofSetColor(cOffset);
-    ofRect(x,y-h+2,w,h);
+    ofDrawRectangle(x, y - h + 2, w, h);
     ofSetColor(255);
-    ofDrawBitmapString("Offset Results", ofVec3f(x + w + 2,y));
+    ofDrawBitmapString("Offset Results", glm::vec3(x + w + 2, y, 0));
 
     
     // draw all of the pieces
@@ -183,39 +159,44 @@ void ofApp::draw()
     ofPushMatrix();
     ofTranslate(-ofGetWidth() / 4, 0);
 
-    for(int i = 0; i < clipSubjects.size(); ++i)
+    for (auto& clipSubject: clipSubjects)
     {
         ofSetColor(cSubject);
         ofNoFill();
-        clipSubjects[i].draw();
+        clipSubject.draw();
     }
     
-    for(int i = 0; i < clipMasks.size(); ++i)
+    for (auto& clipMask: clipMasks)
     {
         ofSetColor(cMask);
         ofNoFill();
-        clipMasks[i].draw();
+        clipMask.draw();
     }
 
     ofPopMatrix();
     
     ofPushMatrix();
     ofTranslate(ofGetWidth() / 4, 0);
-    
-    for (int i = 0; i < clips.size(); ++i)
+
+    ofSetColor(0, 255, 255,  180);
+    ofNoFill();
+    ofDrawRectangle(boundingBox);
+
+
+    for (auto& clip: clips)
     {
         ofSetColor(cResult);
         ofNoFill();
-        clips[i].draw();
+        clip.draw();
     }
 
     if (enableOffsetsToggle)
     {
-        for (int i = 0; i < offsets.size(); ++i)
+        for (auto& offset: offsets)
         {
             ofSetColor(cOffset);
             ofNoFill();
-            offsets[i].draw();
+            offset.draw();
         }
     }
     
@@ -225,11 +206,13 @@ void ofApp::draw()
     ofPushMatrix();
     ofTranslate(ofGetWidth() * 2 / 4, 100);
     complexPath.draw();
-    for (int i = 0; i < simplifiedPath.size(); ++i)
+
+    for (auto& polyline: simplifiedPath)
     {
-        ofSetColor(255,255,0);
-        simplifiedPath[i].draw();
+        ofSetColor(255, 255, 0);
+        polyline.draw();
     }
+    
     ofPopMatrix();
     
     // draw the gui
@@ -237,11 +220,7 @@ void ofApp::draw()
     clipTypePanel.draw();
     offsetPanel.draw();
 
-    
-    ofDisableAlphaBlending();
-
 }
-
 
 
 void ofApp::makeMouseClip()
@@ -250,25 +229,12 @@ void ofApp::makeMouseClip()
     {
         clipMasks.clear();
         ofPolyline p;
-        ofVec3f ctr = ofVec3f(ofGetMouseX() + ofGetWidth() / 4, ofGetMouseY());
-        p.arc(ctr,100,100,0,360);
+        glm::vec3 ctr(ofGetMouseX() + ofGetWidth() / 4, ofGetMouseY(), 0);
+        p.arc(ctr, 100, 100, 0, 360);
         p.close();
         clipMasks.push_back(p);
         bNeedsUpdate = true;
     }
-}
-
-
-void ofApp::mousePressed(int x, int y, int button)
-{
-    makeMouseClip();
-}
-
-
-
-void ofApp::mouseReleased(int x, int y, int button)
-{
-    makeMouseClip();
 }
 
 
@@ -282,32 +248,26 @@ void ofApp::genSubjects(ofxSlider<int>& ct)
 {
     clipSubjects.clear();
     
-    ofVec3f screenCtr = ofVec3f(ofGetWidth()/2, ofGetHeight()/2);
+    glm::vec3 screenCtr = glm::vec3(ofGetWidth() / 2, ofGetHeight() / 2, 0);
     
     for (int i = 0; i < ct; ++i)
     {
         if (clipSubjectType == CIRCLES)
         {
             ofPolyline p;
-            float rad = ofRandom(50,120);
-            ofVec3f ctr = screenCtr + ofVec3f(ofRandom(-100,100),ofRandom(-100,100)); 
-            p.arc(ctr,rad,rad,0,360);
+            float rad = ofRandom(50, 120);
+            glm::vec3 ctr = screenCtr + glm::vec3(ofRandom(-100,100), ofRandom(-100,100), 0);
+            p.arc(ctr, rad, rad, 0, 360);
             p.close();
             clipSubjects.push_back(p);
         }
         else if (clipSubjectType == SQUARES)
         {
             ofRectangle p;
-            float rad = ofRandom(50,120);
-            ofVec3f ctr = screenCtr + ofVec3f(ofRandom(-100,100),ofRandom(-100,100)); 
-            p.setFromCenter(ctr.x,ctr.y,rad,rad);
-            ofPolyline r;
-            r.addVertex(ofVec3f(p.x,p.y));
-            r.addVertex(ofVec3f(p.x+p.width,p.y));
-            r.addVertex(ofVec3f(p.x+p.width,p.y+p.height));
-            r.addVertex(ofVec3f(p.x,p.y+p.height));
-            r.close();
-            clipSubjects.push_back(r);
+            float rad = ofRandom(50, 120);
+            glm::vec3 ctr = screenCtr + glm::vec3(ofRandom(-100, 100), ofRandom(-100, 100), 0);
+            p.setFromCenter(ctr.x, ctr.y, rad, rad);
+            clipSubjects.push_back(ofPolyline::fromRectangle(p));
         }
         else if(clipSubjectType == RANDOM_POLY)
         {
@@ -320,13 +280,13 @@ void ofApp::genSubjects(ofxSlider<int>& ct)
         
         for (int i = 0; i < ct; ++i)
         {
-            ofVec3f ctr = screenCtr + ofVec3f(ofRandom(-150,150),ofRandom(-150,150)); 
+            glm::vec3 ctr = screenCtr + glm::vec3(ofRandom(-150, 150), ofRandom(-150, 150), 0);
             r.addVertex(ctr);
         }
         r.close();
         clipSubjects.push_back(r);
     }
- 
+
     
     bNeedsUpdate = true;
 }
@@ -335,7 +295,7 @@ void ofApp::genSubjects(ofxSlider<int>& ct)
 void ofApp::genMasks(ofxSlider<int>& ct)
 {
     clipMasks.clear();
-    ofVec3f screenCtr = ofVec3f(ofGetWidth()/2, ofGetHeight()/2);
+    glm::vec3 screenCtr(ofGetWidth() / 2, ofGetHeight() / 2, 0);
 
     for (int i = 0; i < ct; ++i)
     {
@@ -343,7 +303,7 @@ void ofApp::genMasks(ofxSlider<int>& ct)
         {
             ofPolyline p;
             float rad = ofRandom(50,120);
-            ofVec3f ctr = screenCtr + ofVec3f(ofRandom(-100,100),ofRandom(-100,100)); 
+            glm::vec3 ctr = screenCtr + glm::vec3(ofRandom(-100, 100), ofRandom(-100, 100), 0);
             p.arc(ctr,rad,rad,0,360);
             p.close();
             clipMasks.push_back(p);
@@ -352,7 +312,7 @@ void ofApp::genMasks(ofxSlider<int>& ct)
         {
             ofRectangle p;
             float rad = ofRandom(50,120);
-            ofVec3f ctr = screenCtr + ofVec3f(ofRandom(-100,100),ofRandom(-100,100)); 
+            glm::vec3 ctr = screenCtr + glm::vec3(ofRandom(-100, 100), ofRandom(-100, 100), 0);
             p.setFromCenter(ctr.x,ctr.y,rad,rad);
             ofPolyline r;
             r.addVertex(ofVec3f(p.x,p.y));
@@ -372,7 +332,7 @@ void ofApp::genMasks(ofxSlider<int>& ct)
         ofPolyline r;
         for (int i = 0; i < ct; ++i)
         {
-            ofVec3f ctr = screenCtr + ofVec3f(ofRandom(-150,150),ofRandom(-150,150)); 
+            glm::vec3 ctr = screenCtr + glm::vec3(ofRandom(-150, 150), ofRandom(-150, 150), 0);
             r.addVertex(ctr);
         }
 
@@ -387,79 +347,21 @@ void ofApp::genMasks(ofxSlider<int>& ct)
 
 void ofApp::clipType(int & ct)
 {
-    switch (ct) {
-        case 0:
-            currentClipperType = OFX_CLIPPER_INTERSECTION;
-            clipTypeSlider.setName("TYPE: INTERSECTION");
-            break;
-        case 1:
-            currentClipperType = OFX_CLIPPER_UNION;
-            clipTypeSlider.setName("TYPE: UNION");
-            break;
-        case 2:
-            currentClipperType = OFX_CLIPPER_DIFFERENCE;
-            clipTypeSlider.setName("TYPE: DIFFERENCE");
-            break;
-        case 3:
-            currentClipperType = OFX_CLIPPER_INTERSECTION;
-            clipTypeSlider.setName("TYPE: XOR");
-            break;
-        default:
-            break;
-    }
-
+    clipTypeSlider.setName("TYPE: " + ofx::Clipper::toString(ClipperLib::ClipType(ct)));
     bNeedsUpdate = true;
 }
 
 
-void ofApp::joinType(int& ct)
+void ofApp::joinType(int& jt)
 {
-    switch (ct)
-    {
-        case 0:
-            currentClipperJoinType = OFX_CLIPPER_JOINTYPE_SQUARE;
-            joinTypeSlider.setName("JOIN TYPE: SQUARE");
-            break;
-        case 1:
-            currentClipperJoinType = OFX_CLIPPER_JOINTYPE_ROUND;
-            joinTypeSlider.setName("JOIN TYPE: ROUND");
-            break;
-        case 2:
-            currentClipperJoinType = OFX_CLIPPER_JOINTYPE_MITER;
-            joinTypeSlider.setName("JOIN TYPE: MITER");
-            break;
-        default:
-            break;
-    }
-
+    joinTypeSlider.setName("TYPE: " + ofx::Clipper::toString(ClipperLib::JoinType(jt)));
     bNeedsUpdate = true;
 }
 
 
-void ofApp::endType(int& ct)
+void ofApp::endType(int& et)
 {
-    switch (ct)
-    {
-        case 0:
-            currentClipperEndType = OFX_CLIPPER_ENDTYPE_SQUARE;
-            endTypeSlider.setName("END TYPE: SQUARE");
-            break;
-        case 1:
-            currentClipperEndType = OFX_CLIPPER_ENDTYPE_ROUND;
-            endTypeSlider.setName("END TYPE: ROUND");
-            break;
-        case 2:
-            currentClipperEndType = OFX_CLIPPER_ENDTYPE_BUTT;
-            endTypeSlider.setName("END TYPE: BUTT");
-            break;
-        case 3:
-            currentClipperEndType = OFX_CLIPPER_ENDTYPE_CLOSED;
-            endTypeSlider.setName("END TYPE: CLOSED");
-            break;
-        default:
-            break;
-    }
-
+    endTypeSlider.setName("TYPE: " + ofx::Clipper::toString(ClipperLib::EndType(et)));
     bNeedsUpdate = true;
 }
 
@@ -497,21 +399,18 @@ void ofApp::subjectPolyType(int& ct)
 
 void ofApp::maskPolyType(int& ct)
 {
-    switch (ct)
+    clipMaskType = TestPolyType(ct);
+
+    switch (clipMaskType)
     {
-        case 0:
-            clipMaskType = CIRCLES;
+        case CIRCLES:
             maskTypeSlider.setName("MASK POLYS: CIRCLE");
             break;
-        case 1:
-            clipMaskType = SQUARES;
+        case SQUARES:
             maskTypeSlider.setName("MASK POLYS: SQUARE");
             break;
-        case 2:
-            clipMaskType = RANDOM_POLY;
+        case RANDOM_POLY:
             maskTypeSlider.setName("MASK POLYS: RANDOM");
-            break;
-        default:
             break;
     }
 
@@ -541,13 +440,13 @@ void ofApp::mouseClipper(bool& b)
 void ofApp::genSimplifyPath(ofxSlider<int>& ct)
 {
     complexPath.clear();
+
     for (int i = 0; i < ct; ++i)
     {
-        complexPath.lineTo(ofVec3f(ofRandom(-80,80),ofRandom(-80,80)));
+        complexPath.lineTo(glm::vec3(ofRandom(-80, 80), ofRandom(-80, 80), 0));
     }
 
     complexPath.close();
         
     bSimplifyPathNeedsUpdate = true;
 }
-

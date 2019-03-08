@@ -48,7 +48,7 @@
   
 //use_deprecated: Enables support for the obsolete OffsetPaths() function
 //which has been replace with the ClipperOffset class.
-#define use_deprecated  
+//#define use_deprecated  
 
 #include <vector>
 #include <set>
@@ -227,7 +227,7 @@ public:
   bool AddPath(const Path &pg, PolyType PolyTyp, bool Closed);
   bool AddPaths(const Paths &ppg, PolyType PolyTyp, bool Closed);
   virtual void Clear();
-  IntRect GetBounds();
+  IntRect GetBounds() const;
   bool PreserveCollinear() {return m_PreserveCollinear;};
   void PreserveCollinear(bool value) {m_PreserveCollinear = value;};
 protected:
@@ -268,6 +268,7 @@ public:
   void StrictlySimple(bool value) {m_StrictSimple = value;};
   //set the callback function for z value filling on intersections (otherwise Z is 0)
 #ifdef use_xyz
+    s
   void ZFillFunction(TZFillCallback zFillFunc);
 #endif
 protected:

@@ -16,8 +16,8 @@ _The library handles complex (self-intersecting) polygons, polygons with holes a
 _Input polygons for clipping can use EvenOdd, NonZero, Positive and Negative filling modes._
 _The clipping code is based on the Vatti clipping algorithm, and out performs other clipping libraries."_
 
-Issues
-------
+Notes
+-----
 
 #### Animation
 
@@ -29,8 +29,9 @@ Clipper outputs a `std::vector<ofPolyline>`. ofPolyline can not be rendered as a
 
 ```cpp
 ofBeginShape();
-for(auto & vert : aPolyline) {
-  ofVertex(vert);
+for(auto& v: aPolyline)
+{
+    ofVertex(v);
 }
 ofEndShape();
 ```
@@ -54,9 +55,78 @@ The addon should sit in `openFrameworks/addons/ofxClipper/`.
 
 ofxClipper has been tested with the latest development version of openFrameworks.
 
+Example
+-------
+```cpp
+void ofApp::draw()
+{
+    ofTranslate(ofGetWidth() / 2, ofGetHeight() / 2);
 
-#License
+    // Create two partially overlapping rotating pentagons
 
-The Clipper license file can be found in the `libs/clipper` folder above.
+    ofPolyline pa, pb;
 
-See [license.txt](https://github.com/bakercp/ofxClipper/raw/master/license.txt) for wrapper details.
+    for(int i = 0; i < 5; i++)
+    {
+        float a = i * glm::two_pi<float>() / 5 + ofGetElapsedTimef();
+        pa.addVertex(300 * std::cos(a) - 80, 300 * std::sin(a));
+        pb.addVertex(300 * std::cos(-a) + 80, 300 * std::sin(-a));
+    }
+
+    pa.close();
+    pb.close();
+
+    // Create and populate clipper
+    ofx::Clipper clipper;
+    clipper.addPolyline(pa, ClipperLib::ptSubject);
+    clipper.addPolyline(pb, ClipperLib::ptClip);
+
+    // Calculate intersection between the two pentagons
+    auto intersection = clipper.getClipped(ClipperLib::ClipType::ctIntersection);
+
+    // Draw result
+    for (auto& line: intersection)
+    {
+        line.draw();
+    }
+}
+```
+
+Note: this minimal example tries to be short, not fast. Avoid creating instances of `ofPolyline` and `ofx::Clipper` inside `draw()`.
+
+Build Status
+------------
+
+No CI.
+
+Compatibility
+-------------
+
+The `stable` branch of this repository is meant to be compatible with the openFrameworks [stable branch](https://github.com/openframeworks/openFrameworks/tree/stable), which corresponds to the latest official openFrameworks release.
+
+The `master` branch of this repository is meant to be compatible with the openFrameworks [master branch](https://github.com/openframeworks/openFrameworks/tree/master).
+
+Some past openFrameworks releases are supported via tagged versions, but only `stable` and `master` branches are actively supported.
+
+Versioning
+----------
+
+This project uses Semantic Versioning, although strict adherence will only come into effect at version 1.0.0.
+
+Licensing
+---------
+
+See [LICENSE.md](LICENSE.md)
+
+Contributing
+------------
+
+Check out the [Help Wanted](https://github.com/bakercp/ofxClipper/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) tag in the issues section for specific ideas or propose your own new ideas.
+
+Pull Requests are always welcome, so if you make any improvements please feel free to float them back upstream :)
+
+1.  Fork this repository.
+2.  Create your feature branch (`git checkout -b my-new-feature`).
+3.  Commit your changes (`git commit -am 'Add some feature'`).
+4.  Push to the branch (`git push origin my-new-feature`).
+5.  Create new Pull Request.
