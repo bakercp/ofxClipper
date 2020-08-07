@@ -26,7 +26,7 @@ Clipper::~Clipper()
 }
 
 
-ofRectangle Clipper::getBounds(ClipperLib::cInt scale) const
+ofRectangle Clipper::getBounds(ClipperLib::cInt scale)
 {
     return toOf(GetBounds(), scale);
 }
@@ -49,8 +49,48 @@ std::vector<ofPolyline> Clipper::getClipped(ClipperLib::ClipType clipType,
                                out,
                                toClipper(subFillType),
                                toClipper(clipFillType));
-
+		
         results = toOf(out, true, scale);
+
+        if (!success)
+        {
+            ofLogError("Clipper::getClipped") << "Failed to create clipped paths.";
+        }
+    }
+    catch (const std::exception& exc)
+    {
+        ofLogError("Clipper::getClipped") << exc.what();
+    }
+
+    return results;
+}
+
+
+std::vector<ofPolyline> Clipper::getClippedLines(ClipperLib::ClipType clipType,
+                                            ofPolyWindingMode subFillType,
+                                            ofPolyWindingMode clipFillType,
+                                            ClipperLib::cInt scale)
+{
+    std::vector<ofPolyline> results;
+
+    bool success = false;
+
+    try
+    {
+        ClipperLib::PolyTree out;
+
+        bool success = Execute(clipType,
+                               out,
+                               toClipper(subFillType),
+                               toClipper(clipFillType));
+		
+
+		ClipperLib::Paths paths;
+		
+		
+		OpenPathsFromPolyTree(out, paths);
+		
+        results = toOf(paths, false, scale);
 
         if (!success)
         {
