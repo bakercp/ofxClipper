@@ -27,8 +27,15 @@ public:
                                        ofPolyWindingMode subFillType = OF_POLY_WINDING_ODD,
                                        ofPolyWindingMode clipFillType = OF_POLY_WINDING_ODD,
                                        ClipperLib::cInt scale = DEFAULT_CLIPPER_SCALE);
+	
+	std::vector<ofPolyline> getClippedLines(ClipperLib::ClipType clipType,
+									   ofPolyWindingMode subFillType = OF_POLY_WINDING_ODD,
+									   ofPolyWindingMode clipFillType = OF_POLY_WINDING_ODD,
+									   ClipperLib::cInt scale = DEFAULT_CLIPPER_SCALE);
+	
+	
 
-    ofRectangle getBounds(ClipperLib::cInt scale = DEFAULT_CLIPPER_SCALE) const;
+    ofRectangle getBounds(ClipperLib::cInt scale = DEFAULT_CLIPPER_SCALE) ;
 
     bool addRectangle(const ofRectangle& rectangle,
                       ClipperLib::PolyType PolyTyp,
