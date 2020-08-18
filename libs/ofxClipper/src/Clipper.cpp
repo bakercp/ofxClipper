@@ -225,19 +225,22 @@ ClipperLib::Paths Clipper::toClipper(const ofPath& path, ClipperLib::cInt scale)
 ofDefaultVertexType Clipper::toOf(const ClipperLib::IntPoint& point,
                                   ClipperLib::cInt scale)
 {
+	float s = scale;
     ofDefaultVertexType vertex;
-    vertex.x = point.X / scale;
-    vertex.y = point.Y / scale;
+    vertex.x = point.X / s;
+    vertex.y = point.Y / s;
     return vertex;
 }
 
 
 ofRectangle Clipper::toOf(const ClipperLib::IntRect& rectangle, ClipperLib::cInt scale)
 {
-    return ofRectangle(rectangle.left / scale,
-                       rectangle.top / scale,
-                       (rectangle.right - rectangle.left) / scale,
-                       (rectangle.bottom - rectangle.top) / scale);
+	float s = scale;
+	
+    return ofRectangle(rectangle.left / s,
+                       rectangle.top / s,
+                       (rectangle.right - rectangle.left) / s,
+                       (rectangle.bottom - rectangle.top) / s);
 }
 
 
